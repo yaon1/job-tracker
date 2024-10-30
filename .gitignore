@@ -1,0 +1,7 @@
+vendor/
+node_modules/
+.nuxt/
+.output/
+*.sqlite
+.phpunit.cache/
+.env
