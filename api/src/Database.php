@@ -49,7 +49,11 @@ final class Database
 
     private static function migrate(\PDO $pdo): void
     {
-        $version = (int) $pdo->query('PRAGMA user_version')?->fetchColumn();
+        $stmt = $pdo->query('PRAGMA user_version');
+        $version = $stmt === false ? null : $stmt->fetchColumn();
+        if (!is_int($version)) {
+            throw new \RuntimeException('Cannot read schema version');
+        }
         foreach (array_slice(self::MIGRATIONS, $version, preserve_keys: true) as $i => $sql) {
             $pdo->beginTransaction();
             $pdo->exec($sql);
