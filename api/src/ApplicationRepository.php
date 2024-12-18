@@ -1,0 +1,169 @@
+<?php
+
+declare(strict_types=1);
+
+namespace JobTracker;
+
+use JobTracker\Http\HttpException;
+
+/**
+ * @phpstan-type Row array<string, scalar|null>
+ */
+final readonly class ApplicationRepository
+{
+    /** @param (\Closure(): \DateTimeImmutable)|null $clock */
+    public function __construct(private \PDO $pdo, private ?\Closure $clock = null)
+    {
+    }
+
+    private function now(): string
+    {
+        return ($this->clock === null ? new \DateTimeImmutable() : ($this->clock)())->format(DATE_ATOM);
+    }
+
+    /** @return Row */
+    public function create(ApplicationInput $in): array
+    {
+        $now = $this->now();
+        $this->pdo->beginTransaction();
+        $this->statement(
+            'INSERT INTO applications (company, position, url, salary_from, salary_to, currency, status, notes, next_action_at, source, external_id, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [...$this->fields($in), $in->source, $in->externalId, $now, $now],
+        );
+        $id = (int) $this->pdo->lastInsertId();
+        $this->logStatus($id, $in->status, $now);
+        $this->pdo->commit();
+
+        return $this->get($id);
+    }
+
+    /** @return Row */
+    public function update(int $id, ApplicationInput $in): array
+    {
+        $current = $this->get($id);
+        $now = $this->now();
+        $this->pdo->beginTransaction();
+        $this->statement(
+            'UPDATE applications SET company = ?, position = ?, url = ?, salary_from = ?, salary_to = ?, currency = ?, status = ?,
+             notes = ?, next_action_at = ?, updated_at = ? WHERE id = ?',
+            [...$this->fields($in), $now, $id],
+        );
+        if ($current['status'] !== $in->status->value) {
+            $this->logStatus($id, $in->status, $now);
+        }
+        $this->pdo->commit();
+
+        return $this->get($id);
+    }
+
+    /** @return Row */
+    public function moveTo(int $id, Status $status): array
+    {
+        $current = $this->get($id);
+        if ($current['status'] === $status->value) {
+            return $current;
+        }
+        $now = $this->now();
+        $this->pdo->beginTransaction();
+        $this->statement('UPDATE applications SET status = ?, updated_at = ? WHERE id = ?', [$status->value, $now, $id]);
+        $this->logStatus($id, $status, $now);
+        $this->pdo->commit();
+
+        return $this->get($id);
+    }
+
+    /** @return Row */
+    public function get(int $id): array
+    {
+        $row = $this->statement('SELECT * FROM applications WHERE id = ?', [$id])->fetch();
+
+        return is_array($row) ? $this->row($row) : throw HttpException::notFound('Application');
+    }
+
+    /** @return list<Row> */
+    public function list(?Status $status = null, string $query = ''): array
+    {
+        $sql = 'SELECT * FROM applications WHERE 1 = 1';
+        $params = [];
+        if ($status !== null) {
+            $sql .= ' AND status = ?';
+            $params[] = $status->value;
+        }
+        if ($query !== '') {
+            $sql .= " AND (company LIKE ? ESCAPE '\\' OR position LIKE ? ESCAPE '\\')";
+            $like = '%' . addcslashes($query, '%_\\') . '%';
+            array_push($params, $like, $like);
+        }
+        $sql .= ' ORDER BY updated_at DESC, id DESC';
+
+        return array_values(array_map($this->row(...), array_filter($this->statement($sql, $params)->fetchAll(), is_array(...))));
+    }
+
+    public function delete(int $id): void
+    {
+        if ($this->statement('DELETE FROM applications WHERE id = ?', [$id])->rowCount() === 0) {
+            throw HttpException::notFound('Application');
+        }
+    }
+
+    public function findExternal(string $source, string $externalId): ?int
+    {
+        $id = $this->statement('SELECT id FROM applications WHERE source = ? AND external_id = ?', [$source, $externalId])->fetchColumn();
+
+        return is_int($id) ? $id : null;
+    }
+
+    /** @return list<array{status: string, changed_at: string}> */
+    public function history(int $id): array
+    {
+        $this->get($id);
+        $rows = $this->statement('SELECT status, changed_at FROM status_changes WHERE application_id = ? ORDER BY changed_at, rowid', [$id])->fetchAll();
+
+        $history = [];
+        foreach ($rows as $r) {
+            if (is_array($r) && is_string($r['status'] ?? null) && is_string($r['changed_at'] ?? null)) {
+                $history[] = ['status' => $r['status'], 'changed_at' => $r['changed_at']];
+            }
+        }
+
+        return $history;
+    }
+
+    /** @return list<scalar|null> */
+    private function fields(ApplicationInput $in): array
+    {
+        return [
+            $in->company, $in->position, $in->url, $in->salaryFrom, $in->salaryTo, $in->currency,
+            $in->status->value, $in->notes, $in->nextActionAt?->format('Y-m-d'),
+        ];
+    }
+
+    private function logStatus(int $id, Status $status, string $at): void
+    {
+        $this->statement('INSERT INTO status_changes (application_id, status, changed_at) VALUES (?, ?, ?)', [$id, $status->value, $at]);
+    }
+
+    /** @param list<scalar|null> $params */
+    private function statement(string $sql, array $params): \PDOStatement
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt;
+    }
+
+    /**
+     * @param array<mixed> $row
+     * @return Row
+     */
+    private function row(array $row): array
+    {
+        $out = [];
+        foreach ($row as $k => $v) {
+            $out[(string) $k] = is_scalar($v) ? $v : null;
+        }
+
+        return $out;
+    }
+}
