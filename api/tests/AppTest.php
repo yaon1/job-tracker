@@ -1,0 +1,64 @@
+<?php
+
+declare(strict_types=1);
+
+namespace JobTracker\Tests;
+
+use JobTracker\App;
+use JobTracker\Database;
+use JobTracker\HhImporter;
+use JobTracker\Http\Request;
+use JobTracker\Http\Router;
+use PHPUnit\Framework\TestCase;
+
+final class AppTest extends TestCase
+{
+    private Router $app;
+
+    protected function setUp(): void
+    {
+        $hh = new HhImporter(fn (string $u): string => '{"name":"Dev","employer":{"name":"Acme"},"salary":null}');
+        $this->app = App::routes(Database::connect('sqlite::memory:'), $hh);
+    }
+
+    /** @return array{int, mixed} */
+    private function call(string $method, string $path, mixed $body = null): array
+    {
+        $response = $this->app->dispatch(new Request($method, $path, body: $body === null ? '' : (string) json_encode($body)));
+
+        return [$response->status, json_decode($response->body ?: 'null', true)];
+    }
+
+    public function testApplicationLifecycle(): void
+    {
+        [$status, $created] = $this->call('POST', '/api/applications', ['company' => 'Acme', 'position' => 'Dev']);
+        self::assertSame(201, $status);
+        self::assertIsArray($created);
+        $id = $created['id'];
+        self::assertIsInt($id);
+
+        self::assertSame(200, $this->call('PATCH', "/api/applications/$id/status", ['status' => 'interview'])[0]);
+        self::assertSame(422, $this->call('PATCH', "/api/applications/$id/status", ['status' => 'hired'])[0]);
+        [, $history] = $this->call('GET', "/api/applications/$id/history");
+        self::assertIsArray($history);
+        self::assertSame(['wishlist', 'interview'], array_column($history, 'status'));
+
+        self::assertSame(204, $this->call('DELETE', "/api/applications/$id")[0]);
+        self::assertSame(404, $this->call('GET', "/api/applications/$id")[0]);
+    }
+
+    public function testHhImportRejectsDuplicates(): void
+    {
+        self::assertSame(201, $this->call('POST', '/api/import/hh', ['url' => 'https://hh.ru/vacancy/9'])[0]);
+        [$status, $body] = $this->call('POST', '/api/import/hh', ['url' => 'https://hh.ru/vacancy/9']);
+        self::assertSame(409, $status);
+        self::assertIsArray($body);
+        self::assertSame(1, $body['id']);
+    }
+
+    public function testRejectsInvalidJson(): void
+    {
+        $response = $this->app->dispatch(new Request('POST', '/api/applications', body: '{oops'));
+        self::assertSame(400, $response->status);
+    }
+}
