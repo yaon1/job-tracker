@@ -48,14 +48,16 @@ final readonly class HhImporter
         );
     }
 
-    public static function httpFetcher(): \Closure
+    /** @param string|null $accessToken hh.ru application token; anonymous API access is rejected with 403 */
+    public static function httpFetcher(?string $accessToken = null): \Closure
     {
-        return static function (string $url): string {
-            $context = stream_context_create(['http' => [
-                'timeout' => 5,
-                // hh.ru requires a descriptive User-Agent for API clients.
-                'header' => "User-Agent: job-tracker/0.1 (https://github.com/yaon1/job-tracker)\r\n",
-            ]]);
+        return static function (string $url) use ($accessToken): string {
+            // hh.ru requires a descriptive User-Agent for API clients.
+            $headers = "User-Agent: job-tracker/0.1 (https://github.com/yaon1/job-tracker)\r\n";
+            if ($accessToken !== null && $accessToken !== '') {
+                $headers .= "Authorization: Bearer $accessToken\r\n";
+            }
+            $context = stream_context_create(['http' => ['timeout' => 5, 'header' => $headers]]);
             $body = @file_get_contents($url, false, $context);
 
             return $body === false ? throw new \RuntimeException("GET $url failed") : $body;

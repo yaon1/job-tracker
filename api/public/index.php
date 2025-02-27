@@ -23,4 +23,4 @@ if ($request->method === 'OPTIONS') {
 }
 
 $pdo = Database::connect('sqlite:' . (getenv('DATABASE_PATH') ?: dirname(__DIR__) . '/data.sqlite'));
-App::routes($pdo, new HhImporter(HhImporter::httpFetcher()))->dispatch($request)->send();
+App::routes($pdo, new HhImporter(HhImporter::httpFetcher(getenv('HH_ACCESS_TOKEN') ?: null)))->dispatch($request)->send();
