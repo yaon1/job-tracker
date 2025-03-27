@@ -1,0 +1,80 @@
+<script setup lang="ts">
+import type { Application, Status } from '~/composables/useApi'
+
+const { stats, query, columns, load, move, importHh } = useBoard()
+const dialog = ref<{ open: () => void }>()
+const editing = ref<Application | null>(null)
+const hhUrl = ref('')
+const notice = ref('')
+const loadError = ref('')
+
+onMounted(async () => {
+  try {
+    await load()
+  } catch (e) {
+    loadError.value = apiError(e).error
+  }
+})
+
+function edit(app: Application | null) {
+  editing.value = app
+  nextTick(() => dialog.value?.open())
+}
+
+async function onMove(id: number, status: Status) {
+  try {
+    await move(id, status)
+  } catch (e) {
+    notice.value = apiError(e).error
+  }
+}
+
+async function onImport() {
+  notice.value = ''
+  try {
+    const app = await importHh(hhUrl.value)
+    hhUrl.value = ''
+    notice.value = `Добавлено: ${app.position} — ${app.company}`
+  } catch (e) {
+    notice.value = apiError(e).error
+  }
+}
+</script>
+
+<template>
+  <div class="page">
+    <header class="top">
+      <h1>Трекер откликов</h1>
+      <form class="import" @submit.prevent="onImport">
+        <input v-model="hhUrl" type="url" placeholder="https://hh.ru/vacancy/…" aria-label="Ссылка на вакансию hh.ru" required />
+        <button class="btn">Импорт с hh.ru</button>
+      </form>
+      <input v-model="query" class="search" type="search" placeholder="Поиск по компании или должности" aria-label="Поиск" />
+      <button class="btn primary" @click="edit(null)">+ Отклик</button>
+    </header>
+
+    <p v-if="notice" class="notice" role="status">{{ notice }}</p>
+    <p v-if="loadError" class="notice error" role="alert">API недоступно: {{ loadError }}</p>
+
+    <StatsBar v-if="stats" :stats="stats" />
+
+    <main class="board">
+      <BoardColumn v-for="c in columns" :key="c.status" v-bind="c" @drop="onMove" @open="edit" />
+    </main>
+
+    <ApplicationDialog ref="dialog" :app="editing" @close="editing = null" />
+  </div>
+</template>
+
+<style scoped>
+.page { padding: 16px; display: grid; gap: 16px; }
+.top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+h1 { font-size: 20px; margin: 0 auto 0 0; }
+.import { display: flex; gap: 6px; }
+.import input, .search { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); min-width: 0; }
+.import input { width: 260px; }
+.notice { margin: 0; padding: 8px 12px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); }
+.notice.error { color: var(--danger); }
+.board { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; align-items: stretch; min-height: 60vh; }
+@media (max-width: 640px) { .import, .import input, .search { width: 100%; } }
+</style>
