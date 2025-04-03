@@ -1,0 +1,69 @@
+# job-tracker
+
+**Канбан-трекер откликов на вакансии.** Когда откликаешься на десятки вакансий, быстро теряешь нить: куда писал, кто ответил, когда следующее интервью и сколько там платят. Трекер держит всё на одной доске и показывает воронку: сколько откликов дошло до собеседований и офферов.
+
+- **Импорт с hh.ru по ссылке:** компания, должность и вилка подтягиваются автоматически, дубликаты отсекаются.
+- **Канбан с drag-and-drop:** Хочу откликнуться → Отклик → Собеседование → Оффер / Отказ. Статус можно менять и с клавиатуры.
+- **История статусов и воронка.** Конверсия в интервью считается честно: отказ после собеседования всё равно засчитывается как дошедший до интервью.
+- **Напоминания:** у карточки есть дата следующего шага, просроченные подсвечиваются.
+- **Self-hosted:** всё хранится в одном файле SQLite.
+
+## Пример использования
+
+```bash
+docker compose up -d
+open http://localhost:3000
+```
+
+Или через API:
+
+```bash
+# добавить вакансию с hh.ru
+curl -X POST localhost:8000/api/import/hh -d '{"url":"https://hh.ru/vacancy/123456"}'
+
+# перевести в «Собеседование»
+curl -X PATCH localhost:8000/api/applications/1/status -d '{"status":"interview"}'
+
+# воронка
+curl localhost:8000/api/stats
+# {"byStatus":{...},"funnel":{"applied":12,"interview":4,"offer":1},"responseRate":33.3}
+```
+
+> api.hh.ru больше не отвечает на анонимные запросы. Для импорта зарегистрируйте приложение на [dev.hh.ru](https://dev.hh.ru) и передайте токен в `HH_ACCESS_TOKEN`. Без токена ручное добавление работает как обычно.
+
+## API
+
+| Метод | Путь | |
+|---|---|---|
+| `GET` | `/api/applications?status=&q=` | Список с фильтром и поиском |
+| `POST` | `/api/applications` | Создать (ошибки валидации по полям, код 422) |
+| `GET` / `PUT` / `DELETE` | `/api/applications/{id}` | |
+| `PATCH` | `/api/applications/{id}/status` | Сменить статус |
+| `GET` | `/api/applications/{id}/history` | История статусов |
+| `POST` | `/api/import/hh` | Импорт по ссылке (409, если уже есть) |
+| `GET` | `/api/stats` | Счётчики и воронка |
+
+## Устройство
+
+```
+api/   PHP 8.4 без фреймворка: роутер, PDO + SQLite с миграциями, PHPStan max, PHPUnit
+web/   Nuxt 4 (SPA): канбан, нативный drag-and-drop, <dialog>, тёмная тема
+```
+
+## Разработка
+
+```bash
+cd api && composer install && composer serve      # http://localhost:8000
+cd web && npm i && npm run dev                    # http://localhost:3000
+cd api && composer test && composer analyse
+```
+
+| Переменная (api) | По умолчанию | |
+|---|---|---|
+| `DATABASE_PATH` | `api/data.sqlite` | Файл БД |
+| `CORS_ORIGIN` | `http://localhost:3000` | Адрес фронтенда |
+| `HH_ACCESS_TOKEN` | — | Токен приложения hh.ru |
+
+## Лицензия
+
+MIT
