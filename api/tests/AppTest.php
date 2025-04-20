@@ -61,4 +61,23 @@ final class AppTest extends TestCase
         $response = $this->app->dispatch(new Request('POST', '/api/applications', body: '{oops'));
         self::assertSame(400, $response->status);
     }
+
+    public function testContactsEndpoints(): void
+    {
+        [, $app] = $this->call('POST', '/api/applications', ['company' => 'Acme', 'position' => 'Dev']);
+        self::assertIsArray($app);
+        $id = $app['id'];
+        self::assertIsInt($id);
+
+        [$status, $contact] = $this->call('POST', "/api/applications/$id/contacts", ['name' => 'Олег', 'role' => 'Tech lead']);
+        self::assertSame(201, $status);
+        self::assertIsArray($contact);
+        self::assertSame(404, $this->call('POST', '/api/applications/999/contacts', ['name' => 'X'])[0]);
+        [, $list] = $this->call('GET', "/api/applications/$id/contacts");
+        self::assertIsArray($list);
+        self::assertCount(1, $list);
+        $contactId = $contact['id'];
+        self::assertIsInt($contactId);
+        self::assertSame(204, $this->call('DELETE', "/api/applications/$id/contacts/$contactId")[0]);
+    }
 }

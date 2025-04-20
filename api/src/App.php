@@ -14,6 +14,7 @@ final class App
     public static function routes(\PDO $pdo, HhImporter $hh): Router
     {
         $repo = new ApplicationRepository($pdo);
+        $contacts = new ContactRepository($pdo);
         $status = static function (mixed $value): Status {
             return (is_string($value) ? Status::tryFrom($value) : null) ?? throw HttpException::validation(['status' => 'Неизвестный статус']);
         };
@@ -46,6 +47,21 @@ final class App
                 }
 
                 return Response::json($repo->create($input), 201);
+            })
+            ->add('GET', '/api/applications/{id}/contacts', function (Request $r) use ($repo, $contacts) {
+                $repo->get($r->intParam('id'));
+
+                return Response::json($contacts->forApplication($r->intParam('id')));
+            })
+            ->add('POST', '/api/applications/{id}/contacts', function (Request $r) use ($repo, $contacts) {
+                $repo->get($r->intParam('id'));
+
+                return Response::json($contacts->add($r->intParam('id'), $r->json()), 201);
+            })
+            ->add('DELETE', '/api/applications/{id}/contacts/{contact}', function (Request $r) use ($contacts) {
+                $contacts->delete($r->intParam('id'), $r->intParam('contact'));
+
+                return Response::noContent();
             })
             ->add('GET', '/api/stats', fn () => Response::json((new Stats($pdo))->summary()));
     }
