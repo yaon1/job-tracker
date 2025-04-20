@@ -33,6 +33,17 @@ final class Database
         )
         SQL,
         'CREATE UNIQUE INDEX applications_external ON applications (source, external_id) WHERE external_id IS NOT NULL',
+        <<<'SQL'
+        CREATE TABLE contacts (
+            id INTEGER PRIMARY KEY,
+            application_id INTEGER NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+            name TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT '',
+            email TEXT,
+            phone TEXT,
+            telegram TEXT
+        )
+        SQL,
     ];
 
     public static function connect(string $dsn): \PDO
