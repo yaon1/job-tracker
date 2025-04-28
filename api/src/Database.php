@@ -44,6 +44,17 @@ final class Database
             telegram TEXT
         )
         SQL,
+        <<<'SQL'
+        CREATE TABLE interviews (
+            id INTEGER PRIMARY KEY,
+            application_id INTEGER NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+            scheduled_at TEXT NOT NULL,
+            duration_min INTEGER NOT NULL DEFAULT 60,
+            kind TEXT NOT NULL,
+            location TEXT NOT NULL DEFAULT '',
+            notes TEXT NOT NULL DEFAULT ''
+        )
+        SQL,
     ];
 
     public static function connect(string $dsn): \PDO
