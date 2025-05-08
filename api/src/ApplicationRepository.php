@@ -82,20 +82,28 @@ final readonly class ApplicationRepository
     }
 
     /** @return list<Row> */
-    public function list(?Status $status = null, string $query = ''): array
+    public function list(?Status $status = null, string $query = '', ?ListFilter $filter = null): array
     {
+        $filter ??= new ListFilter($status, $query);
         $sql = 'SELECT * FROM applications WHERE 1 = 1';
         $params = [];
-        if ($status !== null) {
+        if ($filter->status !== null) {
             $sql .= ' AND status = ?';
-            $params[] = $status->value;
+            $params[] = $filter->status->value;
         }
-        if ($query !== '') {
+        if ($filter->query !== '') {
             $sql .= " AND (company LIKE ? ESCAPE '\\' OR position LIKE ? ESCAPE '\\')";
-            $like = '%' . addcslashes($query, '%_\\') . '%';
+            $like = '%' . addcslashes($filter->query, '%_\\') . '%';
             array_push($params, $like, $like);
         }
-        $sql .= ' ORDER BY updated_at DESC, id DESC';
+        $sql .= ' ORDER BY ' . match ($filter->sort) {
+            'created' => 'created_at DESC',
+            'salary' => 'COALESCE(salary_to, salary_from) IS NULL, COALESCE(salary_to, salary_from) DESC',
+            'company' => 'company COLLATE NOCASE',
+            'next_action' => 'next_action_at IS NULL, next_action_at',
+            default => 'updated_at DESC',
+        } . ', id DESC LIMIT ? OFFSET ?';
+        array_push($params, $filter->limit, $filter->offset);
 
         return array_values(array_map($this->row(...), array_filter($this->statement($sql, $params)->fetchAll(), is_array(...))));
     }

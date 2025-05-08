@@ -25,10 +25,7 @@ final class App
                 static fn (Status $s) => ['value' => $s->value, 'label' => $s->label()],
                 Status::cases(),
             )))
-            ->add('GET', '/api/applications', fn (Request $r) => Response::json($repo->list(
-                isset($r->query['status']) ? $status($r->query['status']) : null,
-                trim($r->query['q'] ?? ''),
-            )))
+            ->add('GET', '/api/applications', fn (Request $r) => Response::json($repo->list(filter: ListFilter::fromQuery($r->query))))
             ->add('POST', '/api/applications', fn (Request $r) => Response::json($repo->create(ApplicationInput::fromArray($r->json())), 201))
             ->add('GET', '/api/applications/{id}', fn (Request $r) => Response::json($repo->get($r->intParam('id'))))
             ->add('PUT', '/api/applications/{id}', fn (Request $r) => Response::json($repo->update($r->intParam('id'), ApplicationInput::fromArray($r->json()))))
