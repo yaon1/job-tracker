@@ -80,4 +80,23 @@ final class AppTest extends TestCase
         self::assertIsInt($contactId);
         self::assertSame(204, $this->call('DELETE', "/api/applications/$id/contacts/$contactId")[0]);
     }
+
+    public function testInterviewsAndCalendarFeed(): void
+    {
+        [, $app] = $this->call('POST', '/api/applications', ['company' => 'Acme', 'position' => 'Dev']);
+        self::assertIsArray($app);
+        $id = $app['id'];
+        self::assertIsInt($id);
+        $when = (new \DateTimeImmutable('+3 days'))->format(DATE_ATOM);
+
+        self::assertSame(201, $this->call('POST', "/api/applications/$id/interviews", ['scheduled_at' => $when, 'kind' => 'tech'])[0]);
+        self::assertSame(422, $this->call('POST', "/api/applications/$id/interviews", ['scheduled_at' => 'soon'])[0]);
+        [, $list] = $this->call('GET', '/api/interviews');
+        self::assertIsArray($list);
+        self::assertCount(1, $list);
+
+        $ics = $this->app->dispatch(new Request('GET', '/api/interviews.ics'));
+        self::assertSame('text/calendar; charset=utf-8', $ics->headers['Content-Type']);
+        self::assertStringContainsString('SUMMARY:Техническое интервью: Acme — Dev', $ics->body);
+    }
 }

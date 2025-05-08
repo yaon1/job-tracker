@@ -15,6 +15,7 @@ final class App
     {
         $repo = new ApplicationRepository($pdo);
         $contacts = new ContactRepository($pdo);
+        $interviews = new InterviewRepository($pdo);
         $status = static function (mixed $value): Status {
             return (is_string($value) ? Status::tryFrom($value) : null) ?? throw HttpException::validation(['status' => 'Неизвестный статус']);
         };
@@ -63,6 +64,22 @@ final class App
 
                 return Response::noContent();
             })
+            ->add('POST', '/api/applications/{id}/interviews', function (Request $r) use ($repo, $interviews) {
+                $repo->get($r->intParam('id'));
+
+                return Response::json($interviews->schedule($r->intParam('id'), $r->json()), 201);
+            })
+            ->add('DELETE', '/api/interviews/{id}', function (Request $r) use ($interviews) {
+                $interviews->cancel($r->intParam('id'));
+
+                return Response::noContent();
+            })
+            ->add('GET', '/api/interviews', fn () => Response::json($interviews->upcoming(new \DateTimeImmutable('-1 day'))))
+            ->add('GET', '/api/interviews.ics', fn () => new Response(
+                200,
+                Calendar::render($interviews->upcoming(new \DateTimeImmutable('-30 days'))),
+                ['Content-Type' => 'text/calendar; charset=utf-8', 'Content-Disposition' => 'inline; filename="interviews.ics"'],
+            ))
             ->add('GET', '/api/stats', fn () => Response::json((new Stats($pdo))->summary()));
     }
 }
