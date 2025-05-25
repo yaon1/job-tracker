@@ -85,7 +85,8 @@ final readonly class ApplicationRepository
     public function list(?Status $status = null, string $query = '', ?ListFilter $filter = null): array
     {
         $filter ??= new ListFilter($status, $query);
-        $sql = 'SELECT * FROM applications WHERE 1 = 1';
+        // Tags come back as one comma-separated column to avoid a query per row.
+        $sql = "SELECT a.*, (SELECT GROUP_CONCAT(tag, ',') FROM (SELECT tag FROM application_tags t WHERE t.application_id = a.id ORDER BY tag)) AS tags FROM applications a WHERE 1 = 1";
         $params = [];
         if ($filter->status !== null) {
             $sql .= ' AND status = ?';
@@ -95,6 +96,10 @@ final readonly class ApplicationRepository
             $sql .= " AND (company LIKE ? ESCAPE '\\' OR position LIKE ? ESCAPE '\\')";
             $like = '%' . addcslashes($filter->query, '%_\\') . '%';
             array_push($params, $like, $like);
+        }
+        if ($filter->tag !== null) {
+            $sql .= ' AND EXISTS (SELECT 1 FROM application_tags t WHERE t.application_id = a.id AND t.tag = ?)';
+            $params[] = $filter->tag;
         }
         if ($filter->source !== null) {
             $sql .= ' AND source = ?';
@@ -115,6 +120,33 @@ final readonly class ApplicationRepository
         array_push($params, $filter->limit, $filter->offset);
 
         return array_values(array_map($this->row(...), array_filter($this->statement($sql, $params)->fetchAll(), is_array(...))));
+    }
+
+    /**
+     * Replaces the tags of an application. Tags are lower-cased and trimmed: "Remote" and "remote " are one tag.
+     *
+     * @param list<string> $tags
+     * @return list<string>
+     */
+    public function setTags(int $id, array $tags): array
+    {
+        $this->get($id);
+        $clean = array_values(array_unique(array_filter(array_map(static fn (string $t) => mb_strtolower(trim($t)), $tags), static fn (string $t) => $t !== '' && mb_strlen($t) <= 30)));
+        $this->pdo->beginTransaction();
+        $this->statement('DELETE FROM application_tags WHERE application_id = ?', [$id]);
+        foreach ($clean as $tag) {
+            $this->statement('INSERT INTO application_tags (application_id, tag) VALUES (?, ?)', [$id, $tag]);
+        }
+        $this->pdo->commit();
+        sort($clean);
+
+        return $clean;
+    }
+
+    /** @return list<string> every tag in use, for autocomplete */
+    public function allTags(): array
+    {
+        return array_values(array_filter($this->statement('SELECT DISTINCT tag FROM application_tags ORDER BY tag', [])->fetchAll(\PDO::FETCH_COLUMN), is_string(...)));
     }
 
     public function delete(int $id): void

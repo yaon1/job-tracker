@@ -69,4 +69,15 @@ final class ApplicationRepositoryTest extends TestCase
         self::assertSame(['High', 'Low', 'Unknown'], array_column($this->repo->list(filter: new \JobTracker\ListFilter(sort: 'salary')), 'company'));
         self::assertSame(['Low'], array_column($this->repo->list(filter: new \JobTracker\ListFilter(sort: 'salary', limit: 1, offset: 1)), 'company'));
     }
+
+    public function testTagsAreNormalisedAndFilterable(): void
+    {
+        $a = (int) $this->repo->create(new ApplicationInput('Acme', 'Dev'))['id'];
+        $this->repo->create(new ApplicationInput('Other', 'Dev'));
+
+        self::assertSame(['remote', 'startup'], $this->repo->setTags($a, ['Startup', ' remote', 'REMOTE', '']));
+        self::assertSame(['Acme'], array_column($this->repo->list(filter: new \JobTracker\ListFilter(tag: 'remote')), 'company'));
+        self::assertSame('remote,startup', $this->repo->list(filter: new \JobTracker\ListFilter(tag: 'remote'))[0]['tags']);
+        self::assertSame(['remote', 'startup'], $this->repo->allTags());
+    }
 }

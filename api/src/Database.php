@@ -55,6 +55,13 @@ final class Database
             notes TEXT NOT NULL DEFAULT ''
         )
         SQL,
+        <<<'SQL'
+        CREATE TABLE application_tags (
+            application_id INTEGER NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+            tag TEXT NOT NULL,
+            PRIMARY KEY (application_id, tag)
+        )
+        SQL,
     ];
 
     public static function connect(string $dsn): \PDO
