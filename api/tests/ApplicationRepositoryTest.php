@@ -57,4 +57,16 @@ final class ApplicationRepositoryTest extends TestCase
         $this->expectException(HttpException::class);
         $this->repo->get((int) $app['id']);
     }
+
+    public function testFiltersBySourceAndSalaryAndSorts(): void
+    {
+        $this->repo->create(new ApplicationInput('Low', 'Dev', salaryFrom: 100_000, salaryTo: 150_000));
+        $this->repo->create(new ApplicationInput('High', 'Dev', salaryFrom: 300_000, source: 'hh', externalId: '1'));
+        $this->repo->create(new ApplicationInput('Unknown', 'Dev'));
+
+        self::assertSame(['High'], array_column($this->repo->list(filter: new \JobTracker\ListFilter(minSalary: 200_000)), 'company'));
+        self::assertSame(['High'], array_column($this->repo->list(filter: new \JobTracker\ListFilter(source: 'hh')), 'company'));
+        self::assertSame(['High', 'Low', 'Unknown'], array_column($this->repo->list(filter: new \JobTracker\ListFilter(sort: 'salary')), 'company'));
+        self::assertSame(['Low'], array_column($this->repo->list(filter: new \JobTracker\ListFilter(sort: 'salary', limit: 1, offset: 1)), 'company'));
+    }
 }

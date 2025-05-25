@@ -96,6 +96,15 @@ final readonly class ApplicationRepository
             $like = '%' . addcslashes($filter->query, '%_\\') . '%';
             array_push($params, $like, $like);
         }
+        if ($filter->source !== null) {
+            $sql .= ' AND source = ?';
+            $params[] = $filter->source;
+        }
+        if ($filter->minSalary !== null) {
+            // A vacancy qualifies if its range can reach the wanted salary.
+            $sql .= ' AND COALESCE(salary_to, salary_from) >= ?';
+            $params[] = $filter->minSalary;
+        }
         $sql .= ' ORDER BY ' . match ($filter->sort) {
             'created' => 'created_at DESC',
             'salary' => 'COALESCE(salary_to, salary_from) IS NULL, COALESCE(salary_to, salary_from) DESC',
@@ -156,7 +165,17 @@ final readonly class ApplicationRepository
     private function statement(string $sql, array $params): \PDOStatement
     {
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
+        // execute($params) would bind everything as text; SQLite then compares numbers
+        // with strings in expressions without column affinity (e.g. COALESCE) and fails.
+        foreach ($params as $i => $value) {
+            $stmt->bindValue($i + 1, $value, match (true) {
+                is_int($value) => \PDO::PARAM_INT,
+                $value === null => \PDO::PARAM_NULL,
+                is_bool($value) => \PDO::PARAM_BOOL,
+                default => \PDO::PARAM_STR,
+            });
+        }
+        $stmt->execute();
 
         return $stmt;
     }
