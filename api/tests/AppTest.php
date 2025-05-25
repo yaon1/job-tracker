@@ -99,4 +99,16 @@ final class AppTest extends TestCase
         self::assertSame('text/calendar; charset=utf-8', $ics->headers['Content-Type']);
         self::assertStringContainsString('SUMMARY:Техническое интервью: Acme — Dev', $ics->body);
     }
+
+    public function testTagEndpoints(): void
+    {
+        [, $app] = $this->call('POST', '/api/applications', ['company' => 'Acme', 'position' => 'Dev']);
+        self::assertIsArray($app);
+        $id = $app['id'];
+        self::assertIsInt($id);
+
+        self::assertSame([200, ['remote']], $this->call('PUT', "/api/applications/$id/tags", ['tags' => ['Remote']]));
+        self::assertSame(422, $this->call('PUT', "/api/applications/$id/tags", ['tags' => [1]])[0]);
+        self::assertSame([200, ['remote']], $this->call('GET', '/api/tags'));
+    }
 }

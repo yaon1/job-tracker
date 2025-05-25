@@ -77,6 +77,16 @@ final class App
                 Calendar::render($interviews->upcoming(new \DateTimeImmutable('-30 days'))),
                 ['Content-Type' => 'text/calendar; charset=utf-8', 'Content-Disposition' => 'inline; filename="interviews.ics"'],
             ))
+            ->add('PUT', '/api/applications/{id}/tags', function (Request $r) use ($repo) {
+                $raw = $r->json()['tags'] ?? null;
+                $tags = [];
+                foreach (is_array($raw) ? $raw : [null] as $tag) {
+                    $tags[] = is_string($tag) ? $tag : throw HttpException::validation(['tags' => 'Список строк']);
+                }
+
+                return Response::json($repo->setTags($r->intParam('id'), $tags));
+            })
+            ->add('GET', '/api/tags', fn () => Response::json($repo->allTags()))
             ->add('GET', '/api/stats', fn () => Response::json((new Stats($pdo))->summary()));
     }
 }
