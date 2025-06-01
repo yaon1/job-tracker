@@ -80,4 +80,15 @@ final class ApplicationRepositoryTest extends TestCase
         self::assertSame('remote,startup', $this->repo->list(filter: new \JobTracker\ListFilter(tag: 'remote'))[0]['tags']);
         self::assertSame(['remote', 'startup'], $this->repo->allTags());
     }
+
+    public function testDueByListsOpenApplicationsWithPastOrTodayActions(): void
+    {
+        $d = static fn (string $s) => new \DateTimeImmutable($s);
+        $this->repo->create(new ApplicationInput('Overdue', 'Dev', status: \JobTracker\Status::Applied, nextActionAt: $d('2026-10-01')));
+        $this->repo->create(new ApplicationInput('Today', 'Dev', nextActionAt: $d('2026-10-20')));
+        $this->repo->create(new ApplicationInput('Later', 'Dev', nextActionAt: $d('2026-11-01')));
+        $this->repo->create(new ApplicationInput('Closed', 'Dev', status: \JobTracker\Status::Rejected, nextActionAt: $d('2026-10-01')));
+
+        self::assertSame(['Overdue', 'Today'], array_column($this->repo->dueBy($d('2026-10-20')), 'company'));
+    }
 }

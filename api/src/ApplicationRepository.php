@@ -143,6 +143,21 @@ final readonly class ApplicationRepository
         return $clean;
     }
 
+    /**
+     * Open applications whose next step is due by $date (overdue first), skipping finished ones.
+     *
+     * @return list<array<string, scalar|null>>
+     */
+    public function dueBy(\DateTimeImmutable $date): array
+    {
+        $rows = $this->statement(
+            "SELECT * FROM applications WHERE next_action_at IS NOT NULL AND next_action_at <= ? AND status NOT IN ('offer', 'rejected') ORDER BY next_action_at, id",
+            [$date->format('Y-m-d')],
+        )->fetchAll();
+
+        return array_values(array_map($this->row(...), array_filter($rows, is_array(...))));
+    }
+
     /** @return list<string> every tag in use, for autocomplete */
     public function allTags(): array
     {

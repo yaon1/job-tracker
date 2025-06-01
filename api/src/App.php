@@ -86,6 +86,7 @@ final class App
 
                 return Response::json($repo->setTags($r->intParam('id'), $tags));
             })
+            ->add('GET', '/api/reminders', fn () => Response::json($repo->dueBy(new \DateTimeImmutable('today'))))
             ->add('GET', '/api/tags', fn () => Response::json($repo->allTags()))
             ->add('GET', '/api/stats', fn () => Response::json((new Stats($pdo))->summary()));
     }
