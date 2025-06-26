@@ -45,7 +45,7 @@ final class StatsTest extends TestCase
         });
 
         $a = (int) $repo->create(new ApplicationInput('A', 'Dev', status: Status::Applied, source: 'hh', externalId: '1'))['id'];
-        $b = (int) $repo->create(new ApplicationInput('B', 'Dev', status: Status::Applied))['id'];
+        $repo->create(new ApplicationInput('B', 'Dev', status: Status::Applied));
         $day = 4;
         $repo->moveTo($a, Status::Interview);
 
@@ -53,6 +53,5 @@ final class StatsTest extends TestCase
         self::assertSame(['applied' => 1, 'interview' => 1, 'rate' => 100.0], $stats['bySource']['hh']);
         self::assertSame(['applied' => 1, 'interview' => 0, 'rate' => 0.0], $stats['bySource']['manual']);
         self::assertSame(4.0, $stats['medianDaysToResponse']);
-        unset($b);
     }
 }
