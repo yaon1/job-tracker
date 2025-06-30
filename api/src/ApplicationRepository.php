@@ -25,15 +25,16 @@ final readonly class ApplicationRepository
     public function create(ApplicationInput $in): array
     {
         $now = $this->now();
-        $this->pdo->beginTransaction();
-        $this->statement(
-            'INSERT INTO applications (company, position, url, salary_from, salary_to, currency, status, notes, next_action_at, source, external_id, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [...$this->fields($in), $in->source, $in->externalId, $now, $now],
-        );
-        $id = (int) $this->pdo->lastInsertId();
-        $this->logStatus($id, $in->status, $now);
-        $this->pdo->commit();
+        $id = 0;
+        $this->transaction(function () use (&$id, $in, $now): void {
+            $this->statement(
+                'INSERT INTO applications (company, position, url, salary_from, salary_to, currency, status, notes, next_action_at, source, external_id, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [...$this->fields($in), $in->source, $in->externalId, $now, $now],
+            );
+            $id = (int) $this->pdo->lastInsertId();
+            $this->logStatus($id, $in->status, $now);
+        });
 
         return $this->get($id);
     }
@@ -43,16 +44,16 @@ final readonly class ApplicationRepository
     {
         $current = $this->get($id);
         $now = $this->now();
-        $this->pdo->beginTransaction();
-        $this->statement(
-            'UPDATE applications SET company = ?, position = ?, url = ?, salary_from = ?, salary_to = ?, currency = ?, status = ?,
-             notes = ?, next_action_at = ?, updated_at = ? WHERE id = ?',
-            [...$this->fields($in), $now, $id],
-        );
-        if ($current['status'] !== $in->status->value) {
-            $this->logStatus($id, $in->status, $now);
-        }
-        $this->pdo->commit();
+        $this->transaction(function () use ($in, $now, $id, $current): void {
+            $this->statement(
+                'UPDATE applications SET company = ?, position = ?, url = ?, salary_from = ?, salary_to = ?, currency = ?, status = ?,
+                 notes = ?, next_action_at = ?, updated_at = ? WHERE id = ?',
+                [...$this->fields($in), $now, $id],
+            );
+            if ($current['status'] !== $in->status->value) {
+                $this->logStatus($id, $in->status, $now);
+            }
+        });
 
         return $this->get($id);
     }
@@ -65,10 +66,10 @@ final readonly class ApplicationRepository
             return $current;
         }
         $now = $this->now();
-        $this->pdo->beginTransaction();
-        $this->statement('UPDATE applications SET status = ?, updated_at = ? WHERE id = ?', [$status->value, $now, $id]);
-        $this->logStatus($id, $status, $now);
-        $this->pdo->commit();
+        $this->transaction(function () use ($status, $now, $id): void {
+            $this->statement('UPDATE applications SET status = ?, updated_at = ? WHERE id = ?', [$status->value, $now, $id]);
+            $this->logStatus($id, $status, $now);
+        });
 
         return $this->get($id);
     }
@@ -132,12 +133,12 @@ final readonly class ApplicationRepository
     {
         $this->get($id);
         $clean = array_values(array_unique(array_filter(array_map(static fn (string $t) => mb_strtolower(trim($t)), $tags), static fn (string $t) => $t !== '' && mb_strlen($t) <= 30)));
-        $this->pdo->beginTransaction();
-        $this->statement('DELETE FROM application_tags WHERE application_id = ?', [$id]);
-        foreach ($clean as $tag) {
-            $this->statement('INSERT INTO application_tags (application_id, tag) VALUES (?, ?)', [$id, $tag]);
-        }
-        $this->pdo->commit();
+        $this->transaction(function () use ($id, $clean): void {
+            $this->statement('DELETE FROM application_tags WHERE application_id = ?', [$id]);
+            foreach ($clean as $tag) {
+                $this->statement('INSERT INTO application_tags (application_id, tag) VALUES (?, ?)', [$id, $tag]);
+            }
+        });
         sort($clean);
 
         return $clean;
@@ -201,6 +202,27 @@ final readonly class ApplicationRepository
             $in->company, $in->position, $in->url, $in->salaryFrom, $in->salaryTo, $in->currency,
             $in->status->value, $in->notes, $in->nextActionAt?->format('Y-m-d'),
         ];
+    }
+
+    /**
+     * Runs $work in a transaction, or inside the caller's if one is already open
+     * (e.g. a CSV import wrapping many creates), so repository methods compose.
+     */
+    private function transaction(\Closure $work): void
+    {
+        if ($this->pdo->inTransaction()) {
+            $work();
+
+            return;
+        }
+        $this->pdo->beginTransaction();
+        try {
+            $work();
+            $this->pdo->commit();
+        } catch (\Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
     }
 
     private function logStatus(int $id, Status $status, string $at): void
