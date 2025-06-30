@@ -86,6 +86,27 @@ final class App
 
                 return Response::json($repo->setTags($r->intParam('id'), $tags));
             })
+            ->add('GET', '/api/export.csv', fn () => new Response(
+                200,
+                Csv::export($repo->list(filter: new ListFilter(limit: 500))),
+                ['Content-Type' => 'text/csv; charset=utf-8', 'Content-Disposition' => 'attachment; filename="applications.csv"'],
+            ))
+            ->add('POST', '/api/import.csv', function (Request $r) use ($repo, $pdo) {
+                $inputs = Csv::import($r->body);
+                // All or nothing: one bad line shouldn't leave half a file imported.
+                $pdo->beginTransaction();
+                try {
+                    foreach ($inputs as $input) {
+                        $repo->create($input);
+                    }
+                    $pdo->commit();
+                } catch (\Throwable $e) {
+                    $pdo->rollBack();
+                    throw $e;
+                }
+
+                return Response::json(['imported' => count($inputs)], 201);
+            })
             ->add('GET', '/api/reminders', fn () => Response::json($repo->dueBy(new \DateTimeImmutable('today'))))
             ->add('GET', '/api/tags', fn () => Response::json($repo->allTags()))
             ->add('GET', '/api/stats', fn () => Response::json((new Stats($pdo))->summary()));

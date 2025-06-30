@@ -111,4 +111,14 @@ final class AppTest extends TestCase
         self::assertSame(422, $this->call('PUT', "/api/applications/$id/tags", ['tags' => [1]])[0]);
         self::assertSame([200, ['remote']], $this->call('GET', '/api/tags'));
     }
+
+    public function testCsvRoundTripThroughTheApi(): void
+    {
+        $response = $this->app->dispatch(new Request('POST', '/api/import.csv', body: "company,position\nAcme,Dev\nBeta,QA\n"));
+        self::assertSame([201, '{"imported":2}'], [$response->status, $response->body]);
+
+        $csv = $this->app->dispatch(new Request('GET', '/api/export.csv'));
+        self::assertSame('text/csv; charset=utf-8', $csv->headers['Content-Type']);
+        self::assertStringContainsString('Beta,QA,wishlist', $csv->body);
+    }
 }
