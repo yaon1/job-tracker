@@ -9,6 +9,7 @@ final readonly class Request
     /**
      * @param array<string, string> $query
      * @param array<string, string> $params route parameters
+     * @param array<string, string> $headers
      */
     public function __construct(
         public string $method,
@@ -16,7 +17,14 @@ final readonly class Request
         public array $query = [],
         public string $body = '',
         public array $params = [],
+        /** @var array<string, string> lower-cased header names */
+        public array $headers = [],
     ) {
+    }
+
+    public function header(string $name): string
+    {
+        return $this->headers[strtolower($name)] ?? '';
     }
 
     public static function fromGlobals(): self
@@ -31,18 +39,27 @@ final readonly class Request
             }
         }
 
+        $headers = [];
+        foreach ($_SERVER as $key => $value) {
+            if (is_string($value) && str_starts_with((string) $key, 'HTTP_')) {
+                $headers[strtolower(str_replace('_', '-', substr((string) $key, 5)))] = $value;
+            }
+        }
+
         return new self(
             strtoupper($method),
             rtrim((string) parse_url($uri, PHP_URL_PATH), '/') ?: '/',
             $query,
             (string) file_get_contents('php://input'),
+            [],
+            $headers,
         );
     }
 
     /** @param array<string, string> $params */
     public function withParams(array $params): self
     {
-        return new self($this->method, $this->path, $this->query, $this->body, $params);
+        return new self($this->method, $this->path, $this->query, $this->body, $params, $this->headers);
     }
 
     /** @return array<mixed> */
