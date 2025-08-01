@@ -1,0 +1,414 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "job-tracker API",
+    "version": "0.2.0",
+    "description": "Трекер откликов на вакансии. При заданном API_TOKEN нужен заголовок Authorization: Bearer <token>."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000"
+    }
+  ],
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "responses": {
+      "Validation": {
+        "description": "Ошибки по полям",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "fields": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/statuses": {
+      "get": {
+        "summary": "Список статусов с подписями",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/applications": {
+      "get": {
+        "summary": "Список откликов (фильтры status, q, source, min_salary, tag; sort; limit, offset)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "summary": "Создать отклик",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          }
+        }
+      }
+    },
+    "/api/applications/{id}": {
+      "get": {
+        "summary": "Отклик",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "put": {
+        "summary": "Изменить отклик",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Удалить отклик",
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/applications/{id}/status": {
+      "patch": {
+        "summary": "Перевести в другой статус",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/applications/{id}/history": {
+      "get": {
+        "summary": "История статусов",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/import/hh": {
+      "post": {
+        "summary": "Импорт вакансии по ссылке hh.ru",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          }
+        }
+      }
+    },
+    "/api/applications/{id}/contacts": {
+      "get": {
+        "summary": "Контакты по отклику",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "post": {
+        "summary": "Добавить контакт",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/applications/{id}/contacts/{contact}": {
+      "delete": {
+        "summary": "Удалить контакт",
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "contact",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/applications/{id}/interviews": {
+      "post": {
+        "summary": "Назначить собеседование",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/interviews/{id}": {
+      "delete": {
+        "summary": "Отменить собеседование",
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/interviews": {
+      "get": {
+        "summary": "Ближайшие собеседования",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/interviews.ics": {
+      "get": {
+        "summary": "Календарь собеседований (iCalendar; токен можно передать в ?token=)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/applications/{id}/tags": {
+      "put": {
+        "summary": "Задать теги",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/export.csv": {
+      "get": {
+        "summary": "Экспорт в CSV",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/import.csv": {
+      "post": {
+        "summary": "Импорт из CSV (всё или ничего)",
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "422": {
+            "$ref": "#/components/responses/Validation"
+          }
+        }
+      }
+    },
+    "/api/reminders": {
+      "get": {
+        "summary": "Отклики с наступившим следующим шагом",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/tags": {
+      "get": {
+        "summary": "Все теги",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "summary": "Статистика и воронка",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
