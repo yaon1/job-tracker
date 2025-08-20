@@ -7,14 +7,22 @@ const editing = ref<Application | null>(null)
 const hhUrl = ref('')
 const notice = ref('')
 const loadError = ref('')
+const needsToken = ref(false)
 
 onMounted(async () => {
+  await reload()
+})
+
+async function reload() {
+  loadError.value = ''
+  needsToken.value = false
   try {
     await load()
   } catch (e) {
-    loadError.value = apiError(e).error
+    if ((e as { statusCode?: number }).statusCode === 401) needsToken.value = true
+    else loadError.value = apiError(e).error
   }
-})
+}
 
 function edit(app: Application | null) {
   editing.value = app
@@ -55,6 +63,7 @@ async function onImport() {
 
     <p v-if="notice" class="notice" role="status">{{ notice }}</p>
     <p v-if="loadError" class="notice error" role="alert">API недоступно: {{ loadError }}</p>
+    <TokenPrompt v-if="needsToken" @saved="reload" />
 
     <StatsBar v-if="stats" :stats="stats" />
 
