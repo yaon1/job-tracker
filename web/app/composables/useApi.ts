@@ -12,6 +12,8 @@ export interface Application {
   notes: string
   next_action_at: string | null
   source: string
+  /** comma-separated, from the list endpoint */
+  tags?: string | null
   created_at: string
   updated_at: string
 }
@@ -23,6 +25,15 @@ export interface Stats {
   byStatus: Record<Status, number>
   funnel: { applied: number; interview: number; offer: number }
   responseRate: number | null
+  bySource: Record<string, { applied: number; interview: number; rate: number | null }>
+  medianDaysToResponse: number | null
+}
+
+export interface Filters {
+  tag: string
+  source: string
+  min_salary: string
+  sort: 'updated' | 'created' | 'salary' | 'company' | 'next_action'
 }
 
 export interface ApiError {
