@@ -31,9 +31,39 @@ export interface ApiError {
   id?: number
 }
 
+const TOKEN_KEY = 'job-tracker-token'
+
+/** API token (if the server sets API_TOKEN). Kept in localStorage: this is a personal, single-user app. */
+export function useApiToken() {
+  const token = useState('api-token', () => {
+    if (!import.meta.client) return ''
+    try {
+      return localStorage.getItem(TOKEN_KEY) ?? ''
+    } catch {
+      return ''
+    }
+  })
+  function save(value: string) {
+    token.value = value
+    try {
+      if (value) localStorage.setItem(TOKEN_KEY, value)
+      else localStorage.removeItem(TOKEN_KEY)
+    } catch {
+      // storage unavailable: the token lives for this tab only
+    }
+  }
+  return { token, save }
+}
+
 export function useApi() {
   const { apiBase } = useRuntimeConfig().public
-  return $fetch.create({ baseURL: apiBase })
+  const { token } = useApiToken()
+  return $fetch.create({
+    baseURL: apiBase,
+    onRequest({ options }) {
+      if (token.value) options.headers.set('authorization', `Bearer ${token.value}`)
+    },
+  })
 }
 
 export function apiError(e: unknown): ApiError {
