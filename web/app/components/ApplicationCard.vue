@@ -30,6 +30,7 @@ function onDragStart(e: DragEvent) {
       <span v-if="salary">{{ salary }}</span>
       <span v-if="app.next_action_at" :class="{ overdue }">⏰ {{ new Date(app.next_action_at).toLocaleDateString('ru-RU') }}</span>
       <span v-if="app.source === 'hh'" class="badge">hh</span>
+      <span v-for="tag in (app.tags ?? '').split(',').filter(Boolean)" :key="tag" class="tag">#{{ tag }}</span>
     </div>
     <!-- Keyboard and touch alternative to drag-and-drop -->
     <label class="sr-only" :for="`move-${app.id}`">Статус</label>
@@ -47,6 +48,7 @@ function onDragStart(e: DragEvent) {
 .company { color: var(--muted); font-size: 14px; }
 .meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--muted); }
 .overdue { color: var(--danger); font-weight: 600; }
+.tag { color: var(--accent); }
 .badge { background: #d6001c; color: #fff; padding: 0 6px; border-radius: 4px; font-weight: 600; }
 .move { font-size: 12px; padding: 2px 4px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
