@@ -63,6 +63,7 @@ async function destroy() {
           <select v-model="form.status"><option v-for="c in COLUMNS" :key="c.status" :value="c.status">{{ c.label }}</option></select>
         </label>
         <label class="field">Следующий шаг<input v-model="form.next_action_at" type="date" /></label>
+        <TagEditor v-if="app" class="wide" :application-id="app.id" :initial="(app.tags ?? '').split(',').filter(Boolean)" @saved="(t) => app && (app.tags = t.join(','))" />
         <label class="field wide">Заметки<textarea v-model="form.notes" rows="4" placeholder="Контакты, вопросы с собеседования, впечатления…" /></label>
       </div>
       <p v-if="message" class="field"><span class="error">{{ message }}</span></p>
