@@ -13,6 +13,7 @@ export function useBoard() {
   const items = useState<Application[]>('applications', () => [])
   const stats = useState<Stats | null>('stats', () => null)
   const query = ref('')
+  const interviews = useState<{ id: number; application_id: number; scheduled_at: string; kind: string; location: string; company: string; position: string }[]>('interviews', () => [])
   const filters = useState<Filters>('filters', () => ({ tag: '', source: '', min_salary: '', sort: 'updated' }))
 
   const columns = computed(() => {
@@ -24,7 +25,11 @@ export function useBoard() {
   async function load() {
     // Empty filter values are dropped so the API applies no constraint for them.
     const params = Object.fromEntries(Object.entries(filters.value).filter(([, v]) => v !== ''))
-    ;[items.value, stats.value] = await Promise.all([api<Application[]>('/applications', { query: params }), api<Stats>('/stats')])
+    ;[items.value, stats.value, interviews.value] = await Promise.all([
+      api<Application[]>('/applications', { query: params }),
+      api<Stats>('/stats'),
+      api<typeof interviews.value>('/interviews'),
+    ])
   }
 
   async function refreshStats() {
@@ -71,5 +76,5 @@ export function useBoard() {
     await refreshStats()
   }
 
-  return { items, stats, query, filters, columns, load, move, save, importHh, remove }
+  return { items, stats, interviews, query, filters, columns, load, move, save, importHh, remove }
 }

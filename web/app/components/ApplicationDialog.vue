@@ -64,6 +64,7 @@ async function destroy() {
         </label>
         <label class="field">Следующий шаг<input v-model="form.next_action_at" type="date" /></label>
         <TagEditor v-if="app" class="wide" :application-id="app.id" :initial="(app.tags ?? '').split(',').filter(Boolean)" @saved="(t) => app && (app.tags = t.join(','))" />
+        <InterviewList v-if="app" class="wide" :application-id="app.id" />
         <ContactList v-if="app" :key="`c${app.id}`" class="wide" :application-id="app.id" />
         <label class="field wide">Заметки<textarea v-model="form.notes" rows="4" placeholder="Контакты, вопросы с собеседования, впечатления…" /></label>
       </div>
