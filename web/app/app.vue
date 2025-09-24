@@ -66,6 +66,7 @@ async function onImport() {
     <TokenPrompt v-if="needsToken" @saved="reload" />
 
     <StatsBar v-if="stats" :stats="stats" />
+    <AgendaPanel @open="edit" />
     <FilterBar />
 
     <main class="board">
