@@ -67,7 +67,10 @@ async function onImport() {
 
     <StatsBar v-if="stats" :stats="stats" />
     <AgendaPanel @open="edit" />
-    <FilterBar />
+    <div class="toolbar">
+      <FilterBar />
+      <CsvTools />
+    </div>
 
     <main class="board">
       <BoardColumn v-for="c in columns" :key="c.status" v-bind="c" @drop="onMove" @open="edit" />
@@ -86,6 +89,7 @@ h1 { font-size: 20px; margin: 0 auto 0 0; }
 .import input { width: 260px; }
 .notice { margin: 0; padding: 8px 12px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); }
 .notice.error { color: var(--danger); }
+.toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px; }
 .board { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; align-items: stretch; min-height: 60vh; }
 @media (max-width: 640px) { .import, .import input, .search { width: 100%; } }
 </style>
