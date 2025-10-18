@@ -5,3 +5,4 @@ node_modules/
 *.sqlite
 .phpunit.cache/
 .env
+.php-cs-fixer.cache
