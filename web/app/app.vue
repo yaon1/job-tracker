@@ -29,6 +29,21 @@ function edit(app: Application | null) {
   nextTick(() => dialog.value?.open())
 }
 
+// Keyboard shortcuts: "n" — new application, "/" — focus search.
+function onKey(e: KeyboardEvent) {
+  const target = e.target as HTMLElement
+  if (target.closest('input, textarea, select, [contenteditable], dialog[open]')) return
+  if (e.key === 'n') {
+    e.preventDefault()
+    edit(null)
+  } else if (e.key === '/') {
+    e.preventDefault()
+    document.querySelector<HTMLInputElement>('.search')?.focus()
+  }
+}
+onMounted(() => window.addEventListener('keydown', onKey))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
+
 async function onMove(id: number, status: Status) {
   try {
     await move(id, status)
@@ -57,8 +72,8 @@ async function onImport() {
         <input v-model="hhUrl" type="url" placeholder="https://hh.ru/vacancy/…" aria-label="Ссылка на вакансию hh.ru" required />
         <button class="btn">Импорт с hh.ru</button>
       </form>
-      <input v-model="query" class="search" type="search" placeholder="Поиск по компании или должности" aria-label="Поиск" />
-      <button class="btn primary" @click="edit(null)">+ Отклик</button>
+      <input v-model="query" class="search" type="search" placeholder="Поиск по компании или должности (/)" aria-label="Поиск" />
+      <button class="btn primary" title="Клавиша N" @click="edit(null)">+ Отклик</button>
     </header>
 
     <p v-if="notice" class="notice" role="status">{{ notice }}</p>
