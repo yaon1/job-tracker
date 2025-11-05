@@ -7,13 +7,20 @@
     "build": "nuxt build",
     "generate": "nuxt generate",
     "postinstall": "nuxt prepare",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "nuxt": "^4.5.2",
     "vue": "^3.5.44"
   },
   "devDependencies": {
+    "@nuxt/eslint-config": "^1.17.0",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.10",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.3.13"
   }
