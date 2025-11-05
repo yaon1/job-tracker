@@ -11,9 +11,7 @@ namespace JobTracker\Http;
  */
 final readonly class TokenAuth
 {
-    public function __construct(private ?string $token)
-    {
-    }
+    public function __construct(private ?string $token) {}
 
     public function allows(Request $request): bool
     {

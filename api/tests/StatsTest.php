@@ -17,9 +17,9 @@ final class StatsTest extends TestCase
     {
         $pdo = Database::connect('sqlite::memory:');
         $repo = new ApplicationRepository($pdo);
-        $make = fn (Status ...$path) => array_reduce(
+        $make = fn(Status ...$path) => array_reduce(
             $path,
-            fn (int $id, Status $s) => (int) $repo->moveTo($id, $s)['id'],
+            fn(int $id, Status $s) => (int) $repo->moveTo($id, $s)['id'],
             (int) $repo->create(new ApplicationInput('C', 'P'))['id'],
         );
 

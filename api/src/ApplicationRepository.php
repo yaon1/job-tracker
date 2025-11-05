@@ -12,9 +12,7 @@ use JobTracker\Http\HttpException;
 final readonly class ApplicationRepository
 {
     /** @param (\Closure(): \DateTimeImmutable)|null $clock */
-    public function __construct(private \PDO $pdo, private ?\Closure $clock = null)
-    {
-    }
+    public function __construct(private \PDO $pdo, private ?\Closure $clock = null) {}
 
     private function now(): string
     {
@@ -132,7 +130,7 @@ final readonly class ApplicationRepository
     public function setTags(int $id, array $tags): array
     {
         $this->get($id);
-        $clean = array_values(array_unique(array_filter(array_map(static fn (string $t) => mb_strtolower(trim($t)), $tags), static fn (string $t) => $t !== '' && mb_strlen($t) <= 30)));
+        $clean = array_values(array_unique(array_filter(array_map(static fn(string $t) => mb_strtolower(trim($t)), $tags), static fn(string $t) => $t !== '' && mb_strlen($t) <= 30)));
         $this->transaction(function () use ($id, $clean): void {
             $this->statement('DELETE FROM application_tags WHERE application_id = ?', [$id]);
             foreach ($clean as $tag) {

@@ -19,8 +19,7 @@ final readonly class Request
         public array $params = [],
         /** @var array<string, string> lower-cased header names */
         public array $headers = [],
-    ) {
-    }
+    ) {}
 
     public function header(string $name): string
     {

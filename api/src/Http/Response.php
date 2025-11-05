@@ -7,9 +7,7 @@ namespace JobTracker\Http;
 final readonly class Response
 {
     /** @param array<string, string> $headers */
-    public function __construct(public int $status, public string $body = '', public array $headers = [])
-    {
-    }
+    public function __construct(public int $status, public string $body = '', public array $headers = []) {}
 
     public static function json(mixed $data, int $status = 200): self
     {

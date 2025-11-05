@@ -17,7 +17,7 @@ final class AppTest extends TestCase
 
     protected function setUp(): void
     {
-        $hh = new HhImporter(fn (string $u): string => '{"name":"Dev","employer":{"name":"Acme"},"salary":null}');
+        $hh = new HhImporter(fn(string $u): string => '{"name":"Dev","employer":{"name":"Acme"},"salary":null}');
         $this->app = App::routes(Database::connect('sqlite::memory:'), $hh);
     }
 

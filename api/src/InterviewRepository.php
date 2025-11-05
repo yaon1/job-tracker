@@ -10,9 +10,7 @@ final readonly class InterviewRepository
 {
     public const KINDS = ['hr', 'tech', 'homework', 'final', 'other'];
 
-    public function __construct(private \PDO $pdo)
-    {
-    }
+    public function __construct(private \PDO $pdo) {}
 
     /**
      * @param array<mixed> $data
@@ -70,7 +68,7 @@ final readonly class InterviewRepository
         $rows = [];
         foreach ($stmt->fetchAll() as $row) {
             if (is_array($row)) {
-                $rows[] = array_map(static fn (mixed $v) => is_scalar($v) ? $v : null, array_combine(array_map('strval', array_keys($row)), $row));
+                $rows[] = array_map(static fn(mixed $v) => is_scalar($v) ? $v : null, array_combine(array_map('strval', array_keys($row)), $row));
             }
         }
 

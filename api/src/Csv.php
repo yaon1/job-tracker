@@ -24,7 +24,7 @@ final class Csv
         fwrite($out, "\u{FEFF}");
         fputcsv($out, self::COLUMNS, escape: '');
         foreach ($rows as $row) {
-            fputcsv($out, array_map(static fn (string $c) => $row[$c] ?? '', self::COLUMNS), escape: '');
+            fputcsv($out, array_map(static fn(string $c) => $row[$c] ?? '', self::COLUMNS), escape: '');
         }
         rewind($out);
 
@@ -40,7 +40,7 @@ final class Csv
     {
         $lines = preg_split('/\r\n|\n|\r/', ltrim($csv, "\u{FEFF}")) ?: [];
         $header = str_getcsv((string) array_shift($lines), escape: '');
-        $index = array_flip(array_map(static fn (?string $h) => strtolower(trim((string) $h)), $header));
+        $index = array_flip(array_map(static fn(?string $h) => strtolower(trim((string) $h)), $header));
         if (!isset($index['company'], $index['position'])) {
             throw HttpException::validation(['file' => 'Нужны колонки company и position']);
         }
@@ -61,7 +61,7 @@ final class Csv
             try {
                 $inputs[] = ApplicationInput::fromArray($data);
             } catch (HttpException $e) {
-                throw HttpException::validation(['line ' . ($n + 2) => implode('; ', array_map(static fn ($k, $v) => "$k: $v", array_keys($e->errors), $e->errors))]);
+                throw HttpException::validation(['line ' . ($n + 2) => implode('; ', array_map(static fn($k, $v) => "$k: $v", array_keys($e->errors), $e->errors))]);
             }
         }
 

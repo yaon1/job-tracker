@@ -21,21 +21,21 @@ final class App
         };
 
         return (new Router())
-            ->add('GET', '/api/statuses', fn () => Response::json(array_map(
-                static fn (Status $s) => ['value' => $s->value, 'label' => $s->label()],
+            ->add('GET', '/api/statuses', fn() => Response::json(array_map(
+                static fn(Status $s) => ['value' => $s->value, 'label' => $s->label()],
                 Status::cases(),
             )))
-            ->add('GET', '/api/applications', fn (Request $r) => Response::json($repo->list(filter: ListFilter::fromQuery($r->query))))
-            ->add('POST', '/api/applications', fn (Request $r) => Response::json($repo->create(ApplicationInput::fromArray($r->json())), 201))
-            ->add('GET', '/api/applications/{id}', fn (Request $r) => Response::json($repo->get($r->intParam('id'))))
-            ->add('PUT', '/api/applications/{id}', fn (Request $r) => Response::json($repo->update($r->intParam('id'), ApplicationInput::fromArray($r->json()))))
-            ->add('PATCH', '/api/applications/{id}/status', fn (Request $r) => Response::json($repo->moveTo($r->intParam('id'), $status($r->json()['status'] ?? null))))
+            ->add('GET', '/api/applications', fn(Request $r) => Response::json($repo->list(filter: ListFilter::fromQuery($r->query))))
+            ->add('POST', '/api/applications', fn(Request $r) => Response::json($repo->create(ApplicationInput::fromArray($r->json())), 201))
+            ->add('GET', '/api/applications/{id}', fn(Request $r) => Response::json($repo->get($r->intParam('id'))))
+            ->add('PUT', '/api/applications/{id}', fn(Request $r) => Response::json($repo->update($r->intParam('id'), ApplicationInput::fromArray($r->json()))))
+            ->add('PATCH', '/api/applications/{id}/status', fn(Request $r) => Response::json($repo->moveTo($r->intParam('id'), $status($r->json()['status'] ?? null))))
             ->add('DELETE', '/api/applications/{id}', function (Request $r) use ($repo) {
                 $repo->delete($r->intParam('id'));
 
                 return Response::noContent();
             })
-            ->add('GET', '/api/applications/{id}/history', fn (Request $r) => Response::json($repo->history($r->intParam('id'))))
+            ->add('GET', '/api/applications/{id}/history', fn(Request $r) => Response::json($repo->history($r->intParam('id'))))
             ->add('POST', '/api/import/hh', function (Request $r) use ($repo, $hh) {
                 $url = $r->json()['url'] ?? null;
                 $input = $hh->import(is_string($url) ? $url : '');
@@ -71,8 +71,8 @@ final class App
 
                 return Response::noContent();
             })
-            ->add('GET', '/api/interviews', fn () => Response::json($interviews->upcoming(new \DateTimeImmutable('-1 day'))))
-            ->add('GET', '/api/interviews.ics', fn () => new Response(
+            ->add('GET', '/api/interviews', fn() => Response::json($interviews->upcoming(new \DateTimeImmutable('-1 day'))))
+            ->add('GET', '/api/interviews.ics', fn() => new Response(
                 200,
                 Calendar::render($interviews->upcoming(new \DateTimeImmutable('-30 days'))),
                 ['Content-Type' => 'text/calendar; charset=utf-8', 'Content-Disposition' => 'inline; filename="interviews.ics"'],
@@ -86,7 +86,7 @@ final class App
 
                 return Response::json($repo->setTags($r->intParam('id'), $tags));
             })
-            ->add('GET', '/api/export.csv', fn () => new Response(
+            ->add('GET', '/api/export.csv', fn() => new Response(
                 200,
                 Csv::export($repo->list(filter: new ListFilter(limit: 500))),
                 ['Content-Type' => 'text/csv; charset=utf-8', 'Content-Disposition' => 'attachment; filename="applications.csv"'],
@@ -107,8 +107,8 @@ final class App
 
                 return Response::json(['imported' => count($inputs)], 201);
             })
-            ->add('GET', '/api/reminders', fn () => Response::json($repo->dueBy(new \DateTimeImmutable('today'))))
-            ->add('GET', '/api/tags', fn () => Response::json($repo->allTags()))
-            ->add('GET', '/api/stats', fn () => Response::json((new Stats($pdo))->summary()));
+            ->add('GET', '/api/reminders', fn() => Response::json($repo->dueBy(new \DateTimeImmutable('today'))))
+            ->add('GET', '/api/tags', fn() => Response::json($repo->allTags()))
+            ->add('GET', '/api/stats', fn() => Response::json((new Stats($pdo))->summary()));
     }
 }

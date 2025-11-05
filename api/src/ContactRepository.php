@@ -9,9 +9,7 @@ use JobTracker\Http\HttpException;
 /** Recruiters and interviewers attached to an application. */
 final readonly class ContactRepository
 {
-    public function __construct(private \PDO $pdo)
-    {
-    }
+    public function __construct(private \PDO $pdo) {}
 
     /**
      * @param array<mixed> $data

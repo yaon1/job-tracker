@@ -20,8 +20,7 @@ final readonly class ListFilter
         public string $sort = 'updated',
         public int $limit = 200,
         public int $offset = 0,
-    ) {
-    }
+    ) {}
 
     /** @param array<string, string> $query */
     public static function fromQuery(array $query): self
@@ -34,7 +33,7 @@ final readonly class ListFilter
         if (!in_array($sort, self::SORTS, true)) {
             throw HttpException::validation(['sort' => 'Сортировка: ' . implode(', ', self::SORTS)]);
         }
-        $int = static fn (string $key, int $default, int $min, int $max): int => isset($query[$key]) && ctype_digit($query[$key])
+        $int = static fn(string $key, int $default, int $min, int $max): int => isset($query[$key]) && ctype_digit($query[$key])
             ? max($min, min($max, (int) $query[$key]))
             : $default;
 

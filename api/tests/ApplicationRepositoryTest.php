@@ -20,7 +20,7 @@ final class ApplicationRepositoryTest extends TestCase
     {
         $this->repo = new ApplicationRepository(
             Database::connect('sqlite::memory:'),
-            fn () => new \DateTimeImmutable('2026-10-01T00:00:00+00:00')->modify('+' . $this->tick++ . ' minutes'),
+            fn() => new \DateTimeImmutable('2026-10-01T00:00:00+00:00')->modify('+' . $this->tick++ . ' minutes'),
         );
     }
 
@@ -83,7 +83,7 @@ final class ApplicationRepositoryTest extends TestCase
 
     public function testDueByListsOpenApplicationsWithPastOrTodayActions(): void
     {
-        $d = static fn (string $s) => new \DateTimeImmutable($s);
+        $d = static fn(string $s) => new \DateTimeImmutable($s);
         $this->repo->create(new ApplicationInput('Overdue', 'Dev', status: \JobTracker\Status::Applied, nextActionAt: $d('2026-10-01')));
         $this->repo->create(new ApplicationInput('Today', 'Dev', nextActionAt: $d('2026-10-20')));
         $this->repo->create(new ApplicationInput('Later', 'Dev', nextActionAt: $d('2026-11-01')));

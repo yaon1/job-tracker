@@ -6,9 +6,7 @@ namespace JobTracker;
 
 final readonly class Stats
 {
-    public function __construct(private \PDO $pdo)
-    {
-    }
+    public function __construct(private \PDO $pdo) {}
 
     /**
      * Counts per status plus a funnel: how many applications reached each stage,

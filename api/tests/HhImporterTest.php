@@ -51,7 +51,7 @@ final class HhImporterTest extends TestCase
 
     public function testUpstreamFailureIs502(): void
     {
-        $importer = new HhImporter(fn (string $url): string => throw new \RuntimeException('down'));
+        $importer = new HhImporter(fn(string $url): string => throw new \RuntimeException('down'));
 
         $this->expectExceptionCode(502);
         $importer->import('https://hh.ru/vacancy/1');
@@ -60,6 +60,6 @@ final class HhImporterTest extends TestCase
     public function testRejectsForeignLinks(): void
     {
         $this->expectException(HttpException::class);
-        (new HhImporter(fn (string $u): string => ''))->import('https://example.com');
+        (new HhImporter(fn(string $u): string => ''))->import('https://example.com');
     }
 }

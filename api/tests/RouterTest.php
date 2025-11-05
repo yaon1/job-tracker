@@ -17,8 +17,8 @@ final class RouterTest extends TestCase
     protected function setUp(): void
     {
         $this->router = (new Router())
-            ->add('GET', '/items/{id}', fn (Request $r) => Response::json(['id' => $r->intParam('id')]))
-            ->add('POST', '/items', fn (Request $r) => throw HttpException::validation(['name' => 'required']));
+            ->add('GET', '/items/{id}', fn(Request $r) => Response::json(['id' => $r->intParam('id')]))
+            ->add('POST', '/items', fn(Request $r) => throw HttpException::validation(['name' => 'required']));
     }
 
     public function testMatchesParams(): void

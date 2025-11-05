@@ -21,8 +21,7 @@ final readonly class ApplicationInput
         public ?\DateTimeImmutable $nextActionAt = null,
         public string $source = 'manual',
         public ?string $externalId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array<mixed> $data

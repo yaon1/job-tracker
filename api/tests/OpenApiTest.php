@@ -12,7 +12,7 @@ final class OpenApiTest extends TestCase
     public function testEveryRouteIsDocumented(): void
     {
         preg_match_all("/->add\\('(\\w+)', '([^']+)'/", (string) file_get_contents(__DIR__ . '/../src/App.php'), $m, PREG_SET_ORDER);
-        $routes = array_map(static fn (array $r) => strtolower($r[1]) . ' ' . $r[2], $m);
+        $routes = array_map(static fn(array $r) => strtolower($r[1]) . ' ' . $r[2], $m);
 
         $spec = json_decode((string) file_get_contents(__DIR__ . '/../openapi.json'), true);
         self::assertIsArray($spec);

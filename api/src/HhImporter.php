@@ -10,9 +10,7 @@ use JobTracker\Http\HttpException;
 final readonly class HhImporter
 {
     /** @param \Closure(string): string $fetch returns the response body for a URL */
-    public function __construct(private \Closure $fetch)
-    {
-    }
+    public function __construct(private \Closure $fetch) {}
 
     public static function vacancyId(string $url): ?string
     {
@@ -34,7 +32,7 @@ final readonly class HhImporter
 
         $employer = is_array($data['employer'] ?? null) && is_string($data['employer']['name'] ?? null) ? $data['employer']['name'] : 'Неизвестная компания';
         $salary = is_array($data['salary'] ?? null) ? $data['salary'] : [];
-        $int = static fn (mixed $v): ?int => is_int($v) ? $v : null;
+        $int = static fn(mixed $v): ?int => is_int($v) ? $v : null;
 
         return new ApplicationInput(
             company: $employer,
