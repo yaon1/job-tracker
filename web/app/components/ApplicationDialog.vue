@@ -3,7 +3,13 @@ import type { Application, ApplicationForm } from '~/composables/useApi'
 
 const props = defineProps<{ app: Application | null }>()
 const emit = defineEmits<{ close: [] }>()
-const { save, remove } = useBoard()
+const { save, remove, items } = useBoard()
+
+// Update the board's copy rather than the prop, so cards reflect new tags immediately.
+function onTagsSaved(tags: string[]) {
+  const item = items.value.find((a) => a.id === props.app?.id)
+  if (item) item.tags = tags.join(',')
+}
 
 const dialog = ref<HTMLDialogElement>()
 const errors = ref<Record<string, string>>({})
@@ -63,7 +69,7 @@ async function destroy() {
           <select v-model="form.status"><option v-for="c in COLUMNS" :key="c.status" :value="c.status">{{ c.label }}</option></select>
         </label>
         <label class="field">Следующий шаг<input v-model="form.next_action_at" type="date" /></label>
-        <TagEditor v-if="app" class="wide" :application-id="app.id" :initial="(app.tags ?? '').split(',').filter(Boolean)" @saved="(t) => app && (app.tags = t.join(','))" />
+        <TagEditor v-if="app" class="wide" :application-id="app.id" :initial="(app.tags ?? '').split(',').filter(Boolean)" @saved="onTagsSaved" />
         <InterviewList v-if="app" class="wide" :application-id="app.id" />
         <ContactList v-if="app" :key="`c${app.id}`" class="wide" :application-id="app.id" />
         <label class="field wide">Заметки<textarea v-model="form.notes" rows="4" placeholder="Контакты, вопросы с собеседования, впечатления…" /></label>
