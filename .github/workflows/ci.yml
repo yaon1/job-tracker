@@ -17,7 +17,9 @@ jobs:
         with:
           php-version: '8.4'
           coverage: none
+      - run: composer validate --strict
       - run: composer install --no-progress --prefer-dist
+      - run: vendor/bin/php-cs-fixer fix --dry-run --diff
       - run: vendor/bin/phpstan analyse --no-progress
       - run: vendor/bin/phpunit
 
@@ -34,6 +36,8 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
       - run: npm run typecheck
       - run: npm run generate
 
