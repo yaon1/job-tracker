@@ -22,7 +22,12 @@ async function schedule() {
     const at = new Date(form.when)
     const offset = -at.getTimezoneOffset()
     const iso = `${form.when}:00${offset >= 0 ? '+' : '-'}${String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0')}:${String(Math.abs(offset) % 60).padStart(2, '0')}`
-    all.value.push(await api<Interview>(`/applications/${props.applicationId}/interviews`, { method: 'POST', body: { scheduled_at: iso, kind: form.kind, location: form.location } }))
+    all.value.push(
+      await api<Interview>(`/applications/${props.applicationId}/interviews`, {
+        method: 'POST',
+        body: { scheduled_at: iso, kind: form.kind, location: form.location },
+      }),
+    )
     form.when = ''
     form.location = ''
   } catch (e) {
@@ -51,7 +56,9 @@ const when = (iso: string) => new Date(iso).toLocaleString('ru-RU', { dateStyle:
     </ul>
     <div class="add">
       <input v-model="form.when" type="datetime-local" aria-label="Дата и время" />
-      <select v-model="form.kind" aria-label="Тип"><option v-for="(label, k) in kinds" :key="k" :value="k">{{ label }}</option></select>
+      <select v-model="form.kind" aria-label="Тип">
+        <option v-for="(label, k) in kinds" :key="k" :value="k">{{ label }}</option>
+      </select>
       <input v-model="form.location" placeholder="Ссылка на встречу или адрес" aria-label="Место" />
       <button type="button" class="btn" :disabled="!form.when" @click="schedule">Назначить</button>
     </div>
@@ -60,10 +67,36 @@ const when = (iso: string) => new Date(iso).toLocaleString('ru-RU', { dateStyle:
 </template>
 
 <style scoped>
-h3 { font-size: 14px; margin: 0 0 6px; }
-ul { list-style: none; margin: 0 0 8px; padding: 0; font-size: 14px; }
-.add { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.add input, .add select { padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
-.link { border: 0; background: none; color: var(--muted); cursor: pointer; }
-.error { color: var(--danger); font-size: 12px; }
+h3 {
+  font-size: 14px;
+  margin: 0 0 6px;
+}
+ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 14px;
+}
+.add {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.add input,
+.add select {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.link {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.error {
+  color: var(--danger);
+  font-size: 12px;
+}
 </style>

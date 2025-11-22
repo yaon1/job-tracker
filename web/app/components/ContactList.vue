@@ -37,7 +37,8 @@ async function remove(c: Contact) {
     <h3>Контакты</h3>
     <ul v-if="contacts.length">
       <li v-for="c in contacts" :key="c.id">
-        <strong>{{ c.name }}</strong><span v-if="c.role"> · {{ c.role }}</span>
+        <strong>{{ c.name }}</strong
+        ><span v-if="c.role"> · {{ c.role }}</span>
         <a v-if="c.telegram" :href="`https://t.me/${c.telegram}`" target="_blank" rel="noopener">@{{ c.telegram }}</a>
         <a v-if="c.email" :href="`mailto:${c.email}`">{{ c.email }}</a>
         <button type="button" class="link" :aria-label="`Удалить ${c.name}`" @click="remove(c)">×</button>
@@ -55,11 +56,44 @@ async function remove(c: Contact) {
 </template>
 
 <style scoped>
-h3 { font-size: 14px; margin: 0 0 6px; }
-ul { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 4px; font-size: 14px; }
-li { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
-.add { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.add input { padding: 6px 8px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
-.link { border: 0; background: none; color: var(--muted); cursor: pointer; }
-.error { color: var(--danger); font-size: 12px; margin: 4px 0 0; }
+h3 {
+  font-size: 14px;
+  margin: 0 0 6px;
+}
+ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+}
+.add {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.add input {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.link {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.error {
+  color: var(--danger);
+  font-size: 12px;
+  margin: 4px 0 0;
+}
 </style>

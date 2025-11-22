@@ -15,11 +15,18 @@ async function importCsv() {
   const file = input.value?.files?.[0]
   if (!file) return
   try {
-    const { imported } = await api<{ imported: number }>('/import.csv', { method: 'POST', body: await file.text(), headers: { 'content-type': 'text/csv' } })
+    const { imported } = await api<{ imported: number }>('/import.csv', {
+      method: 'POST',
+      body: await file.text(),
+      headers: { 'content-type': 'text/csv' },
+    })
     message.value = `Импортировано: ${imported}`
     await load()
   } catch (e) {
-    message.value = Object.entries(apiError(e).fields ?? {}).map(([k, v]) => `${k}: ${v}`).join('; ') || apiError(e).error
+    message.value =
+      Object.entries(apiError(e).fields ?? {})
+        .map(([k, v]) => `${k}: ${v}`)
+        .join('; ') || apiError(e).error
   } finally {
     if (input.value) input.value.value = ''
   }
@@ -35,6 +42,13 @@ async function importCsv() {
 </template>
 
 <style scoped>
-.csv { display: flex; gap: 8px; align-items: center; font-size: 14px; }
-label.btn { cursor: pointer; }
+.csv {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+label.btn {
+  cursor: pointer;
+}
 </style>

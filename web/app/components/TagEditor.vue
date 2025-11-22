@@ -18,7 +18,8 @@ async function save() {
 </script>
 
 <template>
-  <label class="field">Теги через запятую
+  <label class="field"
+    >Теги через запятую
     <span class="row">
       <input v-model="text" placeholder="remote, startup, fintech" @keydown.enter.prevent="save" />
       <button type="button" class="btn" :disabled="saving" @click="save">Сохранить</button>
@@ -27,6 +28,11 @@ async function save() {
 </template>
 
 <style scoped>
-.row { display: flex; gap: 6px; }
-.row input { flex: 1; }
+.row {
+  display: flex;
+  gap: 6px;
+}
+.row input {
+  flex: 1;
+}
 </style>

@@ -18,7 +18,8 @@ onMounted(async () => {
 
 const upcoming = computed(() => interviews.value.filter((i) => new Date(i.scheduled_at) > new Date()).slice(0, 5))
 const calendarUrl = computed(() => `${apiBase}/interviews.ics${token.value ? `?token=${encodeURIComponent(token.value)}` : ''}`)
-const when = (iso: string) => new Date(iso).toLocaleString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+const when = (iso: string) =>
+  new Date(iso).toLocaleString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 const openById = (id: number) => {
   const app = items.value.find((a) => a.id === id)
   if (app) emit('open', app)
@@ -49,13 +50,49 @@ const openById = (id: number) => {
 </template>
 
 <style scoped>
-.agenda { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
-h2 { font-size: 14px; margin: 0 0 8px; }
-ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
-.link { all: unset; cursor: pointer; color: var(--text); }
-.link:hover { color: var(--accent); }
-.link:focus-visible { outline: 2px solid var(--accent); }
-.date { color: var(--danger); font-size: 12px; margin-left: 6px; }
-.subscribe { display: inline-block; margin-top: 8px; font-size: 13px; color: var(--accent); }
+.agenda {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+h2 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+.link {
+  all: unset;
+  cursor: pointer;
+  color: var(--text);
+}
+.link:hover {
+  color: var(--accent);
+}
+.link:focus-visible {
+  outline: 2px solid var(--accent);
+}
+.date {
+  color: var(--danger);
+  font-size: 12px;
+  margin-left: 6px;
+}
+.subscribe {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--accent);
+}
 </style>

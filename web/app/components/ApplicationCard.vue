@@ -34,22 +34,77 @@ function onDragStart(e: DragEvent) {
     </div>
     <!-- Keyboard and touch alternative to drag-and-drop -->
     <label class="sr-only" :for="`move-${app.id}`">Статус</label>
-    <select :id="`move-${app.id}`" class="move" :value="app.status" @change="emit('move', ($event.target as HTMLSelectElement).value as Status)">
+    <select
+      :id="`move-${app.id}`"
+      class="move"
+      :value="app.status"
+      @change="emit('move', ($event.target as HTMLSelectElement).value as Status)"
+    >
       <option v-for="c in COLUMNS" :key="c.status" :value="c.status">{{ c.label }}</option>
     </select>
   </article>
 </template>
 
 <style scoped>
-.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: grid; gap: 6px; cursor: grab; }
-.card:active { cursor: grabbing; }
-.open { all: unset; display: grid; gap: 2px; cursor: pointer; border-radius: 4px; }
-.open:focus-visible { outline: 2px solid var(--accent); }
-.company { color: var(--muted); font-size: 14px; }
-.meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--muted); }
-.overdue { color: var(--danger); font-weight: 600; }
-.tag { color: var(--accent); }
-.badge { background: #d6001c; color: #fff; padding: 0 6px; border-radius: 4px; font-weight: 600; }
-.move { font-size: 12px; padding: 2px 4px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+  cursor: grab;
+}
+.card:active {
+  cursor: grabbing;
+}
+.open {
+  all: unset;
+  display: grid;
+  gap: 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.open:focus-visible {
+  outline: 2px solid var(--accent);
+}
+.company {
+  color: var(--muted);
+  font-size: 14px;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.overdue {
+  color: var(--danger);
+  font-weight: 600;
+}
+.tag {
+  color: var(--accent);
+}
+.badge {
+  background: #d6001c;
+  color: #fff;
+  padding: 0 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.move {
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
 </style>
