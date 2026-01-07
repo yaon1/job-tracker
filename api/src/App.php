@@ -21,6 +21,11 @@ final class App
         };
 
         return (new Router())
+            ->add('GET', '/health', function () use ($pdo) {
+                $pdo->query('SELECT 1');
+
+                return Response::json(['status' => 'ok']);
+            })
             ->add('GET', '/api/statuses', fn() => Response::json(array_map(
                 static fn(Status $s) => ['value' => $s->value, 'label' => $s->label()],
                 Status::cases(),

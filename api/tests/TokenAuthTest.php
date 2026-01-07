@@ -31,4 +31,9 @@ final class TokenAuthTest extends TestCase
         self::assertTrue($auth->allows(new Request('GET', '/api/interviews.ics', ['token' => 's3cret'])));
         self::assertFalse($auth->allows(new Request('GET', '/api/applications', ['token' => 's3cret'])));
     }
+
+    public function testHealthEndpointIsPublic(): void
+    {
+        self::assertTrue((new TokenAuth('s3cret'))->allows(new Request('GET', '/health')));
+    }
 }

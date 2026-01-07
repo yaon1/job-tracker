@@ -409,6 +409,17 @@
           }
         }
       }
+    },
+    "/health": {
+      "get": {
+        "summary": "Проверка живости, без токена",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   }
 }

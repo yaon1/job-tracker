@@ -15,7 +15,8 @@ final readonly class TokenAuth
 
     public function allows(Request $request): bool
     {
-        if ($this->token === null || $this->token === '') {
+        // Liveness checks from Docker/Kubernetes carry no credentials.
+        if ($this->token === null || $this->token === '' || $request->path === '/health') {
             return true;
         }
         $given = preg_replace('/^Bearer\s+/i', '', $request->header('authorization')) ?? '';

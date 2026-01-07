@@ -8,7 +8,7 @@ services:
       HH_ACCESS_TOKEN: ${HH_ACCESS_TOKEN:-}
     volumes: ['tracker-data:/data']
     healthcheck:
-      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8000/api/statuses']
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8000/health']
       interval: 30s
       timeout: 3s
     restart: unless-stopped
@@ -18,7 +18,9 @@ services:
       context: ./web
       args: { API_BASE: 'http://localhost:8000/api' }
     ports: ['3000:80']
-    depends_on: [api]
+    depends_on:
+      api: { condition: service_healthy }
+    restart: unless-stopped
 
 volumes:
   tracker-data:
