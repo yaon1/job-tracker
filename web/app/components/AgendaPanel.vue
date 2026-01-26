@@ -2,19 +2,10 @@
 import type { Application } from '~/composables/useApi'
 
 const emit = defineEmits<{ open: [app: Application] }>()
-const { interviews, items } = useBoard()
-const api = useApi()
+// Loaded together with the board, so they appear as soon as the token is entered.
+const { interviews, items, reminders } = useBoard()
 const { apiBase } = useRuntimeConfig().public
 const { token } = useApiToken()
-const reminders = ref<Application[]>([])
-
-onMounted(async () => {
-  try {
-    reminders.value = await api<Application[]>('/reminders')
-  } catch {
-    // panel just stays empty if the API is unreachable; the board shows the error
-  }
-})
 
 const upcoming = computed(() => interviews.value.filter((i) => new Date(i.scheduled_at) > new Date()).slice(0, 5))
 const calendarUrl = computed(() => `${apiBase}/interviews.ics${token.value ? `?token=${encodeURIComponent(token.value)}` : ''}`)
