@@ -62,6 +62,15 @@ final class Database
             PRIMARY KEY (application_id, tag)
         )
         SQL,
+        <<<'SQL'
+        CREATE TABLE activities (
+            id INTEGER PRIMARY KEY,
+            application_id INTEGER NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+            happened_at TEXT NOT NULL,
+            text TEXT NOT NULL
+        )
+        SQL,
+        'CREATE INDEX applications_status_updated ON applications (status, updated_at)',
     ];
 
     public static function connect(string $dsn): \PDO
