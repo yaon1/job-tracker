@@ -16,6 +16,7 @@ final class App
         $repo = new ApplicationRepository($pdo);
         $contacts = new ContactRepository($pdo);
         $interviews = new InterviewRepository($pdo);
+        $activity = new ActivityLog($pdo);
         $status = static function (mixed $value): Status {
             return (is_string($value) ? Status::tryFrom($value) : null) ?? throw HttpException::validation(['status' => 'Неизвестный статус']);
         };
@@ -113,6 +114,16 @@ final class App
                 return Response::json(['imported' => count($inputs)], 201);
             })
             ->add('GET', '/api/reminders', fn() => Response::json($repo->dueBy(new \DateTimeImmutable('today'))))
+            ->add('GET', '/api/applications/{id}/activity', function (Request $r) use ($repo, $activity) {
+                $repo->get($r->intParam('id'));
+
+                return Response::json($activity->forApplication($r->intParam('id')));
+            })
+            ->add('POST', '/api/applications/{id}/activity', function (Request $r) use ($repo, $activity) {
+                $repo->get($r->intParam('id'));
+
+                return Response::json($activity->add($r->intParam('id'), $r->json()['text'] ?? null), 201);
+            })
             ->add('GET', '/api/tags', fn() => Response::json($repo->allTags()))
             ->add('GET', '/api/stats', fn() => Response::json((new Stats($pdo))->summary()));
     }
