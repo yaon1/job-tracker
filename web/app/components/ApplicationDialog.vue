@@ -89,6 +89,7 @@ async function destroy() {
           :initial="(app.tags ?? '').split(',').filter(Boolean)"
           @saved="onTagsSaved"
         />
+        <ActivityFeed v-if="app" :key="`a${app.id}`" class="wide" :application-id="app.id" />
         <InterviewList v-if="app" class="wide" :application-id="app.id" />
         <ContactList v-if="app" :key="`c${app.id}`" class="wide" :application-id="app.id" />
         <label class="field wide"
