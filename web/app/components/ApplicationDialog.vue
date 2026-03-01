@@ -14,6 +14,8 @@ function onTagsSaved(tags: string[]) {
 const dialog = ref<HTMLDialogElement>()
 const errors = ref<Record<string, string>>({})
 const message = ref('')
+// After a 409 duplicate warning, a second save forces creation.
+const duplicateConfirmed = ref(false)
 const form = reactive<ApplicationForm>({ company: '', position: '' })
 
 function open() {
@@ -31,6 +33,7 @@ function open() {
   })
   errors.value = {}
   message.value = ''
+  duplicateConfirmed.value = false
   dialog.value?.showModal()
 }
 
@@ -39,12 +42,13 @@ defineExpose({ open })
 async function submit() {
   try {
     const toInt = (v: unknown) => (v === '' || v === null || v === undefined ? null : Number(v))
-    await save({ ...form, salary_from: toInt(form.salary_from), salary_to: toInt(form.salary_to) }, props.app?.id)
+    await save({ ...form, salary_from: toInt(form.salary_from), salary_to: toInt(form.salary_to) }, props.app?.id, duplicateConfirmed.value)
     dialog.value?.close()
   } catch (e) {
     const err = apiError(e)
     errors.value = err.fields ?? {}
-    message.value = err.fields ? '' : err.error
+    message.value = err.fields ? '' : err.id ? `${err.error} — проверьте доску или сохраните ещё раз, чтобы добавить всё равно` : err.error
+    if (err.id) duplicateConfirmed.value = true
   }
 }
 

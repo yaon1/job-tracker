@@ -60,8 +60,12 @@ export function useBoard() {
     }
   }
 
-  async function save(form: ApplicationForm, id?: number) {
-    const app = await api<Application>(id ? `/applications/${id}` : '/applications', { method: id ? 'PUT' : 'POST', body: form })
+  async function save(form: ApplicationForm, id?: number, force = false) {
+    const app = await api<Application>(id ? `/applications/${id}` : '/applications', {
+      method: id ? 'PUT' : 'POST',
+      body: form,
+      query: force ? { force: 1 } : {},
+    })
     upsert(app)
     await refreshStats()
     return app
