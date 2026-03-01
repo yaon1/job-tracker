@@ -121,4 +121,16 @@ final class AppTest extends TestCase
         self::assertSame('text/csv; charset=utf-8', $csv->headers['Content-Type']);
         self::assertStringContainsString('Beta,QA,wishlist', $csv->body);
     }
+
+    public function testWarnsAboutDuplicatesUnlessForced(): void
+    {
+        $this->call('POST', '/api/applications', ['company' => 'Acme', 'position' => 'PHP Dev']);
+        [$status, $body] = $this->call('POST', '/api/applications', ['company' => 'ACME', 'position' => 'php dev']);
+        self::assertSame(409, $status);
+        self::assertIsArray($body);
+        self::assertSame(1, $body['id']);
+
+        $forced = $this->app->dispatch(new Request('POST', '/api/applications', ['force' => '1'], (string) json_encode(['company' => 'Acme', 'position' => 'PHP Dev'])));
+        self::assertSame(201, $forced->status);
+    }
 }

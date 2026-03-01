@@ -32,7 +32,16 @@ final class App
                 Status::cases(),
             )))
             ->add('GET', '/api/applications', fn(Request $r) => Response::json($repo->list(filter: ListFilter::fromQuery($r->query))))
-            ->add('POST', '/api/applications', fn(Request $r) => Response::json($repo->create(ApplicationInput::fromArray($r->json())), 201))
+            ->add('POST', '/api/applications', function (Request $r) use ($repo) {
+                $input = ApplicationInput::fromArray($r->json());
+                // ?force=1 skips the check, e.g. when re-applying to the same role months later.
+                $duplicate = ($r->query['force'] ?? '') === '1' ? null : $repo->findDuplicate($input->company, $input->position);
+                if ($duplicate !== null) {
+                    return Response::json(['error' => 'Такой отклик уже есть', 'id' => $duplicate], 409);
+                }
+
+                return Response::json($repo->create($input), 201);
+            })
             ->add('GET', '/api/applications/{id}', fn(Request $r) => Response::json($repo->get($r->intParam('id'))))
             ->add('PUT', '/api/applications/{id}', fn(Request $r) => Response::json($repo->update($r->intParam('id'), ApplicationInput::fromArray($r->json()))))
             ->add('PATCH', '/api/applications/{id}/status', fn(Request $r) => Response::json($repo->moveTo($r->intParam('id'), $status($r->json()['status'] ?? null))))

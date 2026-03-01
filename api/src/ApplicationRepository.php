@@ -170,6 +170,17 @@ final readonly class ApplicationRepository
         }
     }
 
+    /** Existing application for the same company and position (case-insensitive), to warn about duplicates. */
+    public function findDuplicate(string $company, string $position): ?int
+    {
+        $id = $this->statement(
+            'SELECT id FROM applications WHERE lower(company) = lower(?) AND lower(position) = lower(?) LIMIT 1',
+            [trim($company), trim($position)],
+        )->fetchColumn();
+
+        return is_int($id) ? $id : null;
+    }
+
     public function findExternal(string $source, string $externalId): ?int
     {
         $id = $this->statement('SELECT id FROM applications WHERE source = ? AND external_id = ?', [$source, $externalId])->fetchColumn();
