@@ -33,6 +33,13 @@ final readonly class HhImporter
         $employer = is_array($data['employer'] ?? null) && is_string($data['employer']['name'] ?? null) ? $data['employer']['name'] : 'Неизвестная компания';
         $salary = is_array($data['salary'] ?? null) ? $data['salary'] : [];
         $int = static fn(mixed $v): ?int => is_int($v) ? $v : null;
+        // Dictionary fields come as {"id": ..., "name": "..."}; keep the human-readable names.
+        $name = static fn(mixed $v): ?string => is_array($v) && is_string($v['name'] ?? null) ? $v['name'] : null;
+        $details = array_filter([
+            ($e = $name($data['experience'] ?? null)) ? "Опыт: $e" : null,
+            ($sc = $name($data['schedule'] ?? null)) ? "График: $sc" : null,
+            ($a = $name($data['area'] ?? null)) ? "Город: $a" : null,
+        ]);
 
         return new ApplicationInput(
             company: $employer,
@@ -41,6 +48,7 @@ final readonly class HhImporter
             salaryFrom: $int($salary['from'] ?? null),
             salaryTo: $int($salary['to'] ?? null),
             currency: is_string($salary['currency'] ?? null) ? $salary['currency'] : null,
+            notes: implode("\n", $details),
             source: 'hh',
             externalId: $id,
         );

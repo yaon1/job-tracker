@@ -37,6 +37,9 @@ final class HhImporterTest extends TestCase
                 'name' => 'PHP-разработчик',
                 'employer' => ['name' => 'Рога и копыта'],
                 'salary' => ['from' => 250000, 'to' => null, 'currency' => 'RUR'],
+                'experience' => ['id' => 'between3And6', 'name' => 'От 3 до 6 лет'],
+                'schedule' => ['id' => 'remote', 'name' => 'Удаленная работа'],
+                'area' => ['id' => '2', 'name' => 'Санкт-Петербург'],
             ]);
         });
 
@@ -46,6 +49,7 @@ final class HhImporterTest extends TestCase
         self::assertSame('Рога и копыта', $input->company);
         self::assertSame(250000, $input->salaryFrom);
         self::assertNull($input->salaryTo);
+        self::assertSame("Опыт: От 3 до 6 лет\nГрафик: Удаленная работа\nГород: Санкт-Петербург", $input->notes);
         self::assertSame(['hh', '42', 'https://hh.ru/vacancy/42'], [$input->source, $input->externalId, $input->url]);
     }
 
