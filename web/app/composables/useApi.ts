@@ -11,6 +11,7 @@ export interface Application {
   status: Status
   notes: string
   next_action_at: string | null
+  resume: string
   source: string
   /** comma-separated, from the list endpoint */
   tags?: string | null

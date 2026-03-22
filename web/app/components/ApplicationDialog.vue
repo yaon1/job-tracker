@@ -30,6 +30,7 @@ function open() {
     status: a?.status ?? 'wishlist',
     notes: a?.notes ?? '',
     next_action_at: a?.next_action_at ?? '',
+    resume: a?.resume ?? '',
   })
   errors.value = {}
   message.value = ''
@@ -85,6 +86,7 @@ async function destroy() {
             <option v-for="c in COLUMNS" :key="c.status" :value="c.status">{{ c.label }}</option>
           </select>
         </label>
+        <label class="field">Резюме<input v-model="form.resume" placeholder="например, backend-2026-10" maxlength="100" /></label>
         <label class="field">Следующий шаг<input v-model="form.next_action_at" type="date" /></label>
         <TagEditor
           v-if="app"
