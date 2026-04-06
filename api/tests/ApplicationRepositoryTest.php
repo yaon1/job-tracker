@@ -91,4 +91,12 @@ final class ApplicationRepositoryTest extends TestCase
 
         self::assertSame(['Overdue', 'Today'], array_column($this->repo->dueBy($d('2026-10-20')), 'company'));
     }
+
+    public function testStoresWhichResumeWasSent(): void
+    {
+        $id = (int) $this->repo->create(new ApplicationInput('Acme', 'Dev', resume: 'backend-2026-10'))['id'];
+        self::assertSame('backend-2026-10', $this->repo->get($id)['resume']);
+        $this->repo->update($id, new ApplicationInput('Acme', 'Dev', resume: 'fullstack'));
+        self::assertSame('fullstack', $this->repo->get($id)['resume']);
+    }
 }

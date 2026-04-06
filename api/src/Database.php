@@ -71,6 +71,8 @@ final class Database
         )
         SQL,
         'CREATE INDEX applications_status_updated ON applications (status, updated_at)',
+        // Which CV version was sent, e.g. "backend-2026-10" — useful when you tailor resumes.
+        "ALTER TABLE applications ADD COLUMN resume TEXT NOT NULL DEFAULT ''",
     ];
 
     public static function connect(string $dsn): \PDO

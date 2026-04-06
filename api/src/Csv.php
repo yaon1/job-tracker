@@ -12,7 +12,7 @@ use JobTracker\Http\HttpException;
  */
 final class Csv
 {
-    public const COLUMNS = ['company', 'position', 'status', 'url', 'salary_from', 'salary_to', 'currency', 'next_action_at', 'notes'];
+    public const COLUMNS = ['company', 'position', 'status', 'url', 'salary_from', 'salary_to', 'currency', 'next_action_at', 'resume', 'notes'];
 
     /** @param list<array<string, scalar|null>> $rows */
     public static function export(array $rows): string

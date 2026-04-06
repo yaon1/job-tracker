@@ -26,8 +26,8 @@ final readonly class ApplicationRepository
         $id = 0;
         $this->transaction(function () use (&$id, $in, $now): void {
             $this->statement(
-                'INSERT INTO applications (company, position, url, salary_from, salary_to, currency, status, notes, next_action_at, source, external_id, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO applications (company, position, url, salary_from, salary_to, currency, status, notes, next_action_at, resume, source, external_id, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [...$this->fields($in), $in->source, $in->externalId, $now, $now],
             );
             $id = (int) $this->pdo->lastInsertId();
@@ -45,7 +45,7 @@ final readonly class ApplicationRepository
         $this->transaction(function () use ($in, $now, $id, $current): void {
             $this->statement(
                 'UPDATE applications SET company = ?, position = ?, url = ?, salary_from = ?, salary_to = ?, currency = ?, status = ?,
-                 notes = ?, next_action_at = ?, updated_at = ? WHERE id = ?',
+                 notes = ?, next_action_at = ?, resume = ?, updated_at = ? WHERE id = ?',
                 [...$this->fields($in), $now, $id],
             );
             if ($current['status'] !== $in->status->value) {
@@ -209,7 +209,7 @@ final readonly class ApplicationRepository
     {
         return [
             $in->company, $in->position, $in->url, $in->salaryFrom, $in->salaryTo, $in->currency,
-            $in->status->value, $in->notes, $in->nextActionAt?->format('Y-m-d'),
+            $in->status->value, $in->notes, $in->nextActionAt?->format('Y-m-d'), $in->resume,
         ];
     }
 

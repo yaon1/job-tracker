@@ -21,6 +21,7 @@ final readonly class ApplicationInput
         public ?\DateTimeImmutable $nextActionAt = null,
         public string $source = 'manual',
         public ?string $externalId = null,
+        public string $resume = '',
     ) {}
 
     /**
@@ -99,6 +100,7 @@ final readonly class ApplicationInput
             $nextAt,
             $string('source', false, 20) ?? 'manual',
             $string('external_id', false, 50),
+            $string('resume', false, 100) ?? '',
         );
     }
 }

@@ -16,7 +16,7 @@ final class CsvTest extends TestCase
         $csv = Csv::export([['company' => 'Рога, копыта', 'position' => 'PHP', 'status' => 'applied', 'notes' => 'сказали "перезвоним"']]);
 
         self::assertStringStartsWith("\u{FEFF}company,position,status", $csv);
-        self::assertStringContainsString('"Рога, копыта",PHP,applied,,,,,,"сказали ""перезвоним"""', $csv);
+        self::assertStringContainsString('"Рога, копыта",PHP,applied,,,,,,,"сказали ""перезвоним"""', $csv);
     }
 
     public function testImportsAnyColumnOrderAndRoundTrips(): void
