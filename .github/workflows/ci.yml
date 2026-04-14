@@ -22,6 +22,7 @@ jobs:
       - run: vendor/bin/php-cs-fixer fix --dry-run --diff
       - run: vendor/bin/phpstan analyse --no-progress
       - run: vendor/bin/phpunit
+      - run: composer smoke
 
   web:
     runs-on: ubuntu-latest
