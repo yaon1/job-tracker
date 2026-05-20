@@ -55,6 +55,8 @@ async function submit() {
 
 async function destroy() {
   if (!props.app) return
+  // Deleting also removes contacts, interviews and the activity log — make sure it's intended.
+  if (!confirm(`Удалить отклик «${props.app.position}» в ${props.app.company} со всей историей?`)) return
   await remove(props.app.id)
   dialog.value?.close()
 }
