@@ -52,14 +52,19 @@ async function onMove(id: number, status: Status) {
   }
 }
 
+const importing = ref(false)
+
 async function onImport() {
   notice.value = ''
+  importing.value = true
   try {
     const app = await importHh(hhUrl.value)
     hhUrl.value = ''
     notice.value = `Добавлено: ${app.position} — ${app.company}`
   } catch (e) {
     notice.value = apiError(e).error
+  } finally {
+    importing.value = false
   }
 }
 </script>
@@ -70,7 +75,7 @@ async function onImport() {
       <h1>Трекер откликов</h1>
       <form class="import" @submit.prevent="onImport">
         <input v-model="hhUrl" type="url" placeholder="https://hh.ru/vacancy/…" aria-label="Ссылка на вакансию hh.ru" required />
-        <button class="btn">Импорт с hh.ru</button>
+        <button class="btn" :disabled="importing" :aria-busy="importing">{{ importing ? 'Загружаю…' : 'Импорт с hh.ru' }}</button>
       </form>
       <input v-model="query" class="search" type="search" placeholder="Поиск по компании или должности (/)" aria-label="Поиск" />
       <button class="btn primary" title="Клавиша N" @click="edit(null)">+ Отклик</button>
