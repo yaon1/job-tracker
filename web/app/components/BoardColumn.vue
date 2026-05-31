@@ -58,4 +58,8 @@ h2 {
   text-align: center;
   margin: 12px 0;
 }
+/* Phones: one column per screen, swipe between statuses. */
+@media (max-width: 640px) {
+  .column { min-width: 85vw; scroll-snap-align: start; }
+}
 </style>

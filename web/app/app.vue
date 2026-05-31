@@ -165,6 +165,7 @@ kbd { padding: 1px 6px; border: 1px solid var(--border); border-radius: 4px; fon
   min-height: 60vh;
 }
 @media (max-width: 640px) {
+  .board { scroll-snap-type: x mandatory; }
   .import,
   .import input,
   .search {
