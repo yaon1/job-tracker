@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Application, Status } from '~/composables/useApi'
 
-const { stats, query, columns, load, move, importHh } = useBoard()
+const { items, stats, query, columns, load, move, importHh } = useBoard()
 const dialog = ref<{ open: () => void }>()
 const editing = ref<Application | null>(null)
 const hhUrl = ref('')
@@ -92,6 +92,11 @@ async function onImport() {
       <CsvTools />
     </div>
 
+    <section v-if="!loadError && !needsToken && stats && items.length === 0 && !query" class="empty">
+      <h2>Пока пусто</h2>
+      <p>Вставьте ссылку на вакансию hh.ru сверху, добавьте отклик вручную (клавиша <kbd>N</kbd>) или импортируйте свою таблицу через «Импорт CSV».</p>
+    </section>
+
     <main class="board">
       <BoardColumn v-for="c in columns" :key="c.status" v-bind="c" @drop="onMove" @open="edit" />
     </main>
@@ -141,6 +146,9 @@ h1 {
 .notice.error {
   color: var(--danger);
 }
+.empty { text-align: center; padding: 24px; color: var(--muted); }
+.empty h2 { color: var(--text); font-size: 18px; margin: 0 0 6px; }
+kbd { padding: 1px 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; }
 .toolbar {
   display: flex;
   flex-wrap: wrap;
