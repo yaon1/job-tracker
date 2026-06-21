@@ -36,15 +36,24 @@ curl localhost:8000/api/stats
 
 ## API
 
+Полное описание — [`api/openapi.json`](api/openapi.json) (OpenAPI 3.1; тест следит, чтобы в нём был каждый маршрут).
+
 | Метод | Путь | |
 |---|---|---|
-| `GET` | `/api/applications?status=&q=` | Список с фильтром и поиском |
-| `POST` | `/api/applications` | Создать (ошибки валидации по полям, код 422) |
-| `GET` / `PUT` / `DELETE` | `/api/applications/{id}` | |
+| `GET` | `/api/applications?status=&q=&tag=&source=&min_salary=&sort=&limit=&offset=` | Список с фильтрами, сортировкой и пагинацией |
+| `POST` / `PUT` / `DELETE` | `/api/applications[/{id}]` | Создание (409 при дубликате, `?force=1` — всё равно), изменение, удаление |
 | `PATCH` | `/api/applications/{id}/status` | Сменить статус |
 | `GET` | `/api/applications/{id}/history` | История статусов |
-| `POST` | `/api/import/hh` | Импорт по ссылке (409, если уже есть) |
-| `GET` | `/api/stats` | Счётчики и воронка |
+| `GET` / `POST` / `DELETE` | `/api/applications/{id}/contacts[/{contact}]` | Контакты |
+| `GET` / `POST` | `/api/applications/{id}/activity` | Журнал |
+| `PUT` | `/api/applications/{id}/tags`, `GET /api/tags` | Теги |
+| `POST` | `/api/applications/{id}/interviews`, `DELETE /api/interviews/{id}`, `GET /api/interviews` | Собеседования |
+| `GET` | `/api/interviews.ics` | Календарь (iCalendar) |
+| `GET` | `/api/reminders` | Наступившие следующие шаги |
+| `GET` / `POST` | `/api/export.csv`, `/api/import.csv` | CSV (импорт всё-или-ничего) |
+| `POST` | `/api/import/hh` | Импорт по ссылке hh.ru |
+| `GET` | `/api/stats` | Воронка, источники, время ответа |
+| `GET` | `/health` | Проверка живости (без токена) |
 
 ## Устройство
 
