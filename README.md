@@ -89,7 +89,9 @@ web/   Nuxt 4 (SPA): канбан, нативный drag-and-drop, <dialog>, т�
 ```bash
 cd api && composer install && composer serve      # http://localhost:8000
 cd web && npm i && npm run dev                    # http://localhost:3000
-cd api && composer test && composer analyse
+cd api && composer test && composer analyse && composer smoke
+cd api && php bin/seed.php        # демо-данные в пустую базу
+make lint                         # php-cs-fixer, ESLint, Prettier
 ```
 
 | Переменная (api) | По умолчанию | |
@@ -97,6 +99,7 @@ cd api && composer test && composer analyse
 | `DATABASE_PATH` | `api/data.sqlite` | Файл БД |
 | `CORS_ORIGIN` | `http://localhost:3000` | Адрес фронтенда |
 | `HH_ACCESS_TOKEN` | — | Токен приложения hh.ru |
+| `API_TOKEN` | — | Если задан, API требует `Authorization: Bearer …` |
 
 ## Лицензия
 
