@@ -54,4 +54,14 @@ final class StatsTest extends TestCase
         self::assertSame(['applied' => 1, 'interview' => 0, 'rate' => 0.0], $stats['bySource']['manual']);
         self::assertSame(4.0, $stats['medianDaysToResponse']);
     }
+
+    public function testEmptyDatabase(): void
+    {
+        $stats = (new Stats(Database::connect('sqlite::memory:')))->summary();
+
+        self::assertSame(['applied' => 0, 'interview' => 0, 'offer' => 0], $stats['funnel']);
+        self::assertNull($stats['responseRate']);
+        self::assertNull($stats['medianDaysToResponse']);
+        self::assertSame([], $stats['bySource']);
+    }
 }
