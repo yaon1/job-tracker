@@ -70,7 +70,8 @@ final readonly class Request
             throw new HttpException(400, 'Тело запроса должно быть JSON');
         }
 
-        return is_array($data) ? $data : throw new HttpException(400, 'Ожидается JSON-объект');
+        // A JSON list ([1,2]) is not an object; "{}" decodes to [] and is fine.
+        return is_array($data) && ($data === [] || !array_is_list($data)) ? $data : throw new HttpException(400, 'Ожидается JSON-объект');
     }
 
     public function intParam(string $name): int
