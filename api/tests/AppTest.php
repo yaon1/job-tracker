@@ -133,4 +133,9 @@ final class AppTest extends TestCase
         $forced = $this->app->dispatch(new Request('POST', '/api/applications', ['force' => '1'], (string) json_encode(['company' => 'Acme', 'position' => 'PHP Dev'])));
         self::assertSame(201, $forced->status);
     }
+
+    public function testHealthReportsVersion(): void
+    {
+        self::assertSame([200, ['status' => 'ok', 'version' => \JobTracker\App::VERSION]], $this->call('GET', '/health'));
+    }
 }

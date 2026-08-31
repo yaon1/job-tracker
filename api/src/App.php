@@ -11,6 +11,8 @@ use JobTracker\Http\Router;
 
 final class App
 {
+    public const VERSION = '0.2.0';
+
     public static function routes(\PDO $pdo, HhImporter $hh): Router
     {
         $repo = new ApplicationRepository($pdo);
@@ -25,7 +27,7 @@ final class App
             ->add('GET', '/health', function () use ($pdo) {
                 $pdo->query('SELECT 1');
 
-                return Response::json(['status' => 'ok']);
+                return Response::json(['status' => 'ok', 'version' => self::VERSION]);
             })
             ->add('GET', '/api/statuses', fn() => Response::json(array_map(
                 static fn(Status $s) => ['value' => $s->value, 'label' => $s->label()],
