@@ -15,6 +15,7 @@
 
 ```bash
 docker compose up -d
+docker compose exec api php bin/seed.php   # по желанию: демо-данные, чтобы посмотреть интерфейс
 open http://localhost:3000
 ```
 
