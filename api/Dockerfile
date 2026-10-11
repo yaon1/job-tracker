@@ -8,6 +8,7 @@ WORKDIR /app
 COPY --from=deps /app/vendor vendor
 COPY src src
 COPY public public
+COPY bin bin
 RUN mkdir /data && chown www-data /data
 ENV DATABASE_PATH=/data/tracker.sqlite PHP_CLI_SERVER_WORKERS=4
 USER www-data
