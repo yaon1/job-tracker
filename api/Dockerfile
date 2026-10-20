@@ -3,7 +3,7 @@ WORKDIR /app
 COPY composer.json ./
 RUN composer install --no-dev --no-interaction --optimize-autoloader --no-scripts
 
-FROM php:8.4-cli-alpine
+FROM php:8.5-cli-alpine
 WORKDIR /app
 COPY --from=deps /app/vendor vendor
 COPY src src
